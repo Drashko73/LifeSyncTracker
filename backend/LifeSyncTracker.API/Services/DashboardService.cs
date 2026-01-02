@@ -3,6 +3,8 @@ using LifeSyncTracker.API.Data;
 using LifeSyncTracker.API.Models.DTOs;
 using LifeSyncTracker.API.Models.Entities;
 using LifeSyncTracker.API.Services.Interfaces;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace LifeSyncTracker.API.Services;
 
@@ -13,16 +15,19 @@ public class DashboardService : IDashboardService
 {
     private readonly ApplicationDbContext _context;
     private readonly ITimeEntryService _timeEntryService;
+    private readonly IWebHostEnvironment _environment;
 
     /// <summary>
     /// Initializes a new instance of the DashboardService.
     /// </summary>
     /// <param name="context">Database context.</param>
     /// <param name="timeEntryService">Time entry service.</param>
-    public DashboardService(ApplicationDbContext context, ITimeEntryService timeEntryService)
+    /// <param name="environment">Web host environment.</param>
+    public DashboardService(ApplicationDbContext context, ITimeEntryService timeEntryService, IWebHostEnvironment environment)
     {
         _context = context;
         _timeEntryService = timeEntryService;
+        _environment = environment;
     }
 
     /// <inheritdoc />
@@ -52,21 +57,46 @@ public class DashboardService : IDashboardService
                 && te.DurationMinutes.HasValue)
             .SumAsync(te => te.DurationMinutes ?? 0);
 
-        // Calculate monthly income
-        var monthlyIncome = await _context.Transactions
-            .Include(t => t.Category)
-            .Where(t => t.UserId == userId
-                && t.Date >= startOfMonth
-                && t.Category.Type == TransactionType.Income)
-            .SumAsync(t => t.Amount);
+        decimal monthlyIncome;
+        decimal monthlyExpenses;
 
-        // Calculate monthly expenses
-        var monthlyExpenses = await _context.Transactions
-            .Include(t => t.Category)
-            .Where(t => t.UserId == userId
-                && t.Date >= startOfMonth
-                && t.Category.Type == TransactionType.Expense)
-            .SumAsync(t => t.Amount);
+        if (_environment.IsDevelopment())
+        {
+            // SQLite doesn't support Sum on decimals. We need to do it in memory.
+            var incomeTransactions = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userId
+                    && t.Date >= startOfMonth
+                    && t.Category.Type == TransactionType.Income)
+                .ToListAsync();
+            monthlyIncome = incomeTransactions.Sum(t => t.Amount);
+
+            var expenseTransactions = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userId
+                    && t.Date >= startOfMonth
+                    && t.Category.Type == TransactionType.Expense)
+                .ToListAsync();
+            monthlyExpenses = expenseTransactions.Sum(t => t.Amount);
+        }
+        else
+        {
+            // Calculate monthly income
+            monthlyIncome = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userId
+                    && t.Date >= startOfMonth
+                    && t.Category.Type == TransactionType.Income)
+                .SumAsync(t => t.Amount);
+
+            // Calculate monthly expenses
+            monthlyExpenses = await _context.Transactions
+                .Include(t => t.Category)
+                .Where(t => t.UserId == userId
+                    && t.Date >= startOfMonth
+                    && t.Category.Type == TransactionType.Expense)
+                .SumAsync(t => t.Amount);
+        }
 
         // Get active projects count
         var activeProjectsCount = await _context.Projects
