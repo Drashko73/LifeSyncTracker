@@ -6,13 +6,12 @@ import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { DropdownModule } from 'primeng/dropdown';
-import { CalendarModule } from 'primeng/calendar';
+import { InputNumber } from 'primeng/inputnumber';
+import { Select } from 'primeng/select';
+import { DatePicker } from 'primeng/datepicker';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { TabViewModule } from 'primeng/tabview';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TransactionService } from '../../core/services/transaction.service';
 import { Transaction, TransactionCategory, TransactionType, TransactionFilterDto, FinancialSummary, ApiResponse, PaginatedResponse } from '../../core/models';
@@ -32,19 +31,18 @@ import { Transaction, TransactionCategory, TransactionType, TransactionFilterDto
     TableModule,
     DialogModule,
     InputTextModule,
-    InputNumberModule,
-    DropdownModule,
-    CalendarModule,
+    InputNumber,
+    Select,
+    DatePicker,
     ToastModule,
-    ConfirmDialogModule,
-    ProgressSpinnerModule,
-    TabViewModule
+    ConfirmDialog,
+    ProgressSpinnerModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
     <div class="p-4 md:p-6 bg-gray-50 min-h-screen">
       <p-toast></p-toast>
-      <p-confirmDialog></p-confirmDialog>
+      <p-confirmdialog></p-confirmdialog>
 
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -107,7 +105,7 @@ import { Transaction, TransactionCategory, TransactionType, TransactionFilterDto
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-            <p-dropdown 
+            <p-select 
               [options]="transactionTypes" 
               [(ngModel)]="filterType" 
               optionLabel="label" 
@@ -116,11 +114,11 @@ import { Transaction, TransactionCategory, TransactionType, TransactionFilterDto
               [showClear]="true"
               styleClass="w-full"
               (onChange)="loadTransactions()"
-            ></p-dropdown>
+            ></p-select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <p-dropdown 
+            <p-select 
               [options]="categories()" 
               [(ngModel)]="filterCategoryId" 
               optionLabel="name" 
@@ -129,27 +127,27 @@ import { Transaction, TransactionCategory, TransactionType, TransactionFilterDto
               [showClear]="true"
               styleClass="w-full"
               (onChange)="loadTransactions()"
-            ></p-dropdown>
+            ></p-select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-            <p-calendar 
+            <p-datepicker 
               [(ngModel)]="filterStartDate" 
               dateFormat="yy-mm-dd"
               [showIcon]="true"
               styleClass="w-full"
               (onSelect)="loadTransactions()"
-            ></p-calendar>
+            ></p-datepicker>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-            <p-calendar 
+            <p-datepicker 
               [(ngModel)]="filterEndDate" 
               dateFormat="yy-mm-dd"
               [showIcon]="true"
               styleClass="w-full"
               (onSelect)="loadTransactions()"
-            ></p-calendar>
+            ></p-datepicker>
           </div>
           <div class="flex items-end">
             <p-button label="Clear" icon="pi pi-times" severity="secondary" (onClick)="clearFilters()"></p-button>
@@ -239,7 +237,7 @@ import { Transaction, TransactionCategory, TransactionType, TransactionFilterDto
         <form [formGroup]="transactionForm">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-            <p-dropdown 
+            <p-select 
               [options]="categories()" 
               formControlName="categoryId" 
               optionLabel="name" 
@@ -257,26 +255,26 @@ import { Transaction, TransactionCategory, TransactionType, TransactionFilterDto
                   </span>
                 </div>
               </ng-template>
-            </p-dropdown>
+            </p-select>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
-            <p-inputNumber 
+            <p-inputnumber 
               formControlName="amount" 
               mode="currency" 
               currency="USD"
               [min]="0.01"
               styleClass="w-full"
-            ></p-inputNumber>
+            ></p-inputnumber>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
-            <p-calendar 
+            <p-datepicker 
               formControlName="date" 
               dateFormat="yy-mm-dd"
               [showIcon]="true"
               styleClass="w-full"
-            ></p-calendar>
+            ></p-datepicker>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>

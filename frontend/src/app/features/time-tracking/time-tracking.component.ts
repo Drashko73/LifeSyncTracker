@@ -11,13 +11,13 @@ import { Select } from 'primeng/select';
 import { DatePicker } from 'primeng/datepicker';
 import { MultiSelect } from 'primeng/multiselect';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TimeEntryService } from '../../core/services/time-entry.service';
 import { ProjectService } from '../../core/services/project.service';
 import { TagService } from '../../core/services/tag.service';
-import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResponse } from '../../core/models';
+import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../core/models';
 
 /**
  * Time tracking component for managing timers and time entries.
@@ -39,7 +39,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
     DatePicker,
     MultiSelect,
     ToastModule,
-    ConfirmDialogModule,
+    ConfirmDialog,
     ProgressSpinnerModule
   ],
   providers: [MessageService, ConfirmationService],
@@ -106,7 +106,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
-            <p-dropdown 
+            <p-select 
               [options]="projects()" 
               [(ngModel)]="filterProjectId" 
               optionLabel="name" 
@@ -115,27 +115,27 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
               [showClear]="true"
               styleClass="w-full"
               (onChange)="loadTimeEntries()"
-            ></p-dropdown>
+            ></p-select>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
-            <p-calendar 
+            <p-datepicker 
               [(ngModel)]="filterStartDate" 
               dateFormat="yy-mm-dd"
               [showIcon]="true"
               styleClass="w-full"
               (onSelect)="loadTimeEntries()"
-            ></p-calendar>
+            ></p-datepicker>
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
-            <p-calendar 
+            <p-datepicker 
               [(ngModel)]="filterEndDate" 
               dateFormat="yy-mm-dd"
               [showIcon]="true"
               styleClass="w-full"
               (onSelect)="loadTimeEntries()"
-            ></p-calendar>
+            ></p-datepicker>
           </div>
           <div class="flex items-end">
             <p-button label="Clear Filters" icon="pi pi-times" severity="secondary" (onClick)="clearFilters()"></p-button>
@@ -221,7 +221,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
         <form [formGroup]="stopTimerForm">
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
-            <p-dropdown 
+            <p-select 
               [options]="projects()" 
               formControlName="projectId" 
               optionLabel="name" 
@@ -229,12 +229,12 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
               placeholder="Select a project"
               [showClear]="true"
               styleClass="w-full"
-            ></p-dropdown>
+            ></p-select>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">What have I done?</label>
             <textarea 
-              pInputTextarea 
+              pTextarea 
               formControlName="description" 
               rows="3" 
               class="w-full"
@@ -244,7 +244,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">What should be done next?</label>
             <textarea 
-              pInputTextarea 
+              pTextarea 
               formControlName="nextSteps" 
               rows="3" 
               class="w-full"
@@ -253,14 +253,14 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-            <p-multiSelect 
+            <p-multiselect 
               [options]="tags()" 
               formControlName="tagIds" 
               optionLabel="name" 
               optionValue="id"
               placeholder="Select tags"
               styleClass="w-full"
-            ></p-multiSelect>
+            ></p-multiselect>
           </div>
         </form>
         <ng-template pTemplate="footer">
@@ -281,28 +281,28 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
-              <p-calendar 
+              <p-datepicker 
                 formControlName="startTime" 
                 [showTime]="true" 
                 [showIcon]="true"
                 dateFormat="yy-mm-dd"
                 styleClass="w-full"
-              ></p-calendar>
+              ></p-datepicker>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
-              <p-calendar 
+              <p-datepicker 
                 formControlName="endTime" 
                 [showTime]="true" 
                 [showIcon]="true"
                 dateFormat="yy-mm-dd"
                 styleClass="w-full"
-              ></p-calendar>
+              ></p-datepicker>
             </div>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
-            <p-dropdown 
+            <p-select 
               [options]="projects()" 
               formControlName="projectId" 
               optionLabel="name" 
@@ -310,12 +310,12 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
               placeholder="Select a project"
               [showClear]="true"
               styleClass="w-full"
-            ></p-dropdown>
+            ></p-select>
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea 
-              pInputTextarea 
+              pTextarea 
               formControlName="description" 
               rows="3" 
               class="w-full"
@@ -325,7 +325,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Next Steps</label>
             <textarea 
-              pInputTextarea 
+              pTextarea 
               formControlName="nextSteps" 
               rows="3" 
               class="w-full"
@@ -334,14 +334,14 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse, PaginatedResp
           </div>
           <div class="mb-4">
             <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-            <p-multiSelect 
+            <p-multiselect 
               [options]="tags()" 
               formControlName="tagIds" 
               optionLabel="name" 
               optionValue="id"
               placeholder="Select tags"
               styleClass="w-full"
-            ></p-multiSelect>
+            ></p-multiselect>
           </div>
         </form>
         <ng-template pTemplate="footer">
@@ -397,7 +397,7 @@ export class TimeTrackingComponent implements OnInit {
 
   private loadProjects(): void {
     this.projectService.getAll().subscribe({
-      next: (response) => {
+      next: (response: ApiResponse<Project[]>) => {
         if (response.success && response.data) {
           this.projects.set(response.data);
         }
@@ -407,7 +407,7 @@ export class TimeTrackingComponent implements OnInit {
 
   private loadTags(): void {
     this.tagService.getAll().subscribe({
-      next: (response) => {
+      next: (response: ApiResponse<Tag[]>) => {
         if (response.success && response.data) {
           this.tags.set(response.data);
         }
@@ -452,7 +452,7 @@ export class TimeTrackingComponent implements OnInit {
 
   startTimer(): void {
     this.timeEntryService.startTimer({}).subscribe({
-      next: (response) => {
+      next: (response: ApiResponse<TimeEntry>) => {
         if (response.success) {
           this.messageService.add({
             severity: 'success',
@@ -461,7 +461,7 @@ export class TimeTrackingComponent implements OnInit {
           });
         }
       },
-      error: (error) => {
+      error: (error: { error?: { message?: string } }) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
@@ -492,7 +492,7 @@ export class TimeTrackingComponent implements OnInit {
       nextSteps: formValue.nextSteps || undefined,
       tagIds: formValue.tagIds || []
     }).subscribe({
-      next: (response) => {
+      next: (response: ApiResponse<TimeEntry>) => {
         if (response.success) {
           this.showStopDialog = false;
           this.loadTimeEntries();
@@ -503,7 +503,7 @@ export class TimeTrackingComponent implements OnInit {
           });
         }
       },
-      error: (error) => {
+      error: (error: { error?: { message?: string } }) => {
         this.messageService.add({
           severity: 'error',
           summary: 'Error',
