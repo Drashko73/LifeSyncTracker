@@ -29,7 +29,10 @@ public class DashboardService : IDashboardService
     public async Task<DashboardStatsDto> GetDashboardStatsAsync(int userId)
     {
         var now = DateTime.UtcNow;
-        var startOfWeek = now.Date.AddDays(-(int)now.DayOfWeek);
+        // Use culture-aware first day of week for proper internationalization
+        var firstDayOfWeek = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
+        var daysFromFirstDay = ((int)now.DayOfWeek - (int)firstDayOfWeek + 7) % 7;
+        var startOfWeek = now.Date.AddDays(-daysFromFirstDay);
         var startOfMonth = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
 
         // Get running timer

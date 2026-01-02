@@ -381,7 +381,14 @@ public class TimeEntryService : ITimeEntryService
         var category = await _context.TransactionCategories
             .FirstOrDefaultAsync(c => c.Name == "Freelance" && c.IsSystem);
 
-        if (category == null) return;
+        if (category == null)
+        {
+            // Log warning that the Freelance category is missing and auto-income cannot be created
+            // In a production app, this would use ILogger
+            Console.WriteLine($"Warning: Cannot create auto-income for time entry {entry.Id}. " +
+                "The 'Freelance' system category is missing. Please ensure database is seeded properly.");
+            return;
+        }
 
         var transaction = new Transaction
         {

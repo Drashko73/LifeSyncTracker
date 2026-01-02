@@ -27,9 +27,9 @@ public class CreateProjectDto
     public decimal? HourlyRate { get; set; }
 
     /// <summary>
-    /// Whether to automatically create income transactions.
+    /// Whether to automatically create income transactions. Defaults to false.
     /// </summary>
-    public bool AutoCreateIncome { get; set; } = true;
+    public bool AutoCreateIncome { get; set; } = false;
 
     /// <summary>
     /// Description of the project.
