@@ -58,6 +58,13 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
             >
               <i class="pi pi-dollar mr-1"></i> Finance
             </a>
+            <a 
+              routerLink="/settings" 
+              routerLinkActive="text-blue-600 bg-blue-50" 
+              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+            >
+              <i class="pi pi-cog mr-1"></i> Settings
+            </a>
           </nav>
 
           <!-- Right side: Timer + User -->
@@ -114,6 +121,14 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
           >
             <i class="pi pi-dollar text-lg"></i>
             <span>Finance</span>
+          </a>
+          <a 
+            routerLink="/settings" 
+            routerLinkActive="text-blue-600" 
+            class="flex flex-col items-center text-gray-600 text-xs"
+          >
+            <i class="pi pi-cog text-lg"></i>
+            <span>Settings</span>
           </a>
         </div>
       </div>

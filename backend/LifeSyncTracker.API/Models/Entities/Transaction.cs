@@ -4,6 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace LifeSyncTracker.API.Models.Entities;
 
 /// <summary>
+/// Supported currencies.
+/// </summary>
+public enum Currency
+{
+    USD = 0,
+    EUR = 1,
+    RSD = 2
+}
+
+/// <summary>
 /// Represents a financial transaction (income or expense).
 /// </summary>
 public class Transaction
@@ -20,6 +30,11 @@ public class Transaction
     [Required]
     [Column(TypeName = "decimal(18,2)")]
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Currency of the transaction.
+    /// </summary>
+    public Currency Currency { get; set; } = Currency.USD;
 
     /// <summary>
     /// Date of the transaction.

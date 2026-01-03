@@ -8,6 +8,7 @@ import {
   CreateTransactionDto, 
   UpdateTransactionDto,
   CreateTransactionCategoryDto,
+  UpdateTransactionCategoryDto,
   TransactionFilterDto,
   FinancialSummary,
   PaginatedResponse,
@@ -37,6 +38,13 @@ export class TransactionService {
    */
   createCategory(dto: CreateTransactionCategoryDto): Observable<ApiResponse<TransactionCategory>> {
     return this.http.post<ApiResponse<TransactionCategory>>(`${this.apiUrl}/categories`, dto);
+  }
+
+  /**
+   * Updates a custom transaction category.
+   */
+  updateCategory(id: number, dto: UpdateTransactionCategoryDto): Observable<ApiResponse<TransactionCategory>> {
+    return this.http.put<ApiResponse<TransactionCategory>>(`${this.apiUrl}/categories/${id}`, dto);
   }
 
   /**
