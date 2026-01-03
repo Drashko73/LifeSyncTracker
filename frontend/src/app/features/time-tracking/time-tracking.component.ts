@@ -77,7 +77,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
           </div>
           
           <div class="flex items-center space-x-4">
-            <span class="timer-display text-4xl font-mono dark:text-gray-100" [class.text-blue-600]="timeEntryService.isTimerRunning()" [class.dark:text-blue-400]="timeEntryService.isTimerRunning()">
+            <span class="timer-display text-4xl font-mono dark:text-gray-100" [ngClass]="{'text-blue-600 dark:text-blue-400': timeEntryService.isTimerRunning()}">
               {{ timeEntryService.formatElapsedTime(timeEntryService.elapsedSeconds()) }}
             </span>
             

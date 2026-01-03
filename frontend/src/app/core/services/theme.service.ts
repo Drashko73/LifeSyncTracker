@@ -7,6 +7,11 @@ import { isPlatformBrowser } from '@angular/common';
 export type ThemeMode = 'light' | 'dark' | 'system';
 
 /**
+ * Valid theme mode values.
+ */
+export const VALID_THEME_MODES: readonly ThemeMode[] = ['light', 'dark', 'system'] as const;
+
+/**
  * Service for managing application theme (Light, Dark, System).
  * Handles PrimeNG dark mode class and persists preference to localStorage.
  */
@@ -51,7 +56,7 @@ export class ThemeService {
    */
   private loadTheme(): void {
     const stored = localStorage.getItem(this.STORAGE_KEY) as ThemeMode | null;
-    if (stored && ['light', 'dark', 'system'].includes(stored)) {
+    if (stored && VALID_THEME_MODES.includes(stored)) {
       this.themeModeSignal.set(stored);
     } else {
       this.themeModeSignal.set('system');

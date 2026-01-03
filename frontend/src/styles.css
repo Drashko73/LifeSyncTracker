@@ -11,9 +11,9 @@
 
 /* 
  * Theme Configuration
- * Enable dark mode with .dark-mode class selector
+ * Enable dark mode with .dark-mode class selector on html element
  */
-@custom-variant dark (&:where(.dark-mode, .dark-mode *));
+@custom-variant dark (&:where(.dark-mode *));
 
 /* 
  * PrimeNG Compatibility Layer

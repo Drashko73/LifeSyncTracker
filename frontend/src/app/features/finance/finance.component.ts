@@ -90,12 +90,12 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-500 dark:text-gray-400 text-sm">Net Balance</p>
-              <p class="text-2xl font-bold" [class]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
+              <p class="text-2xl font-bold" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
                 \{{ formatCurrency(summary()?.netBalance || 0, userPreferencesService.getCurrency()) }}
               </p>
             </div>
-            <div class="p-3 rounded-full" [class]="(summary()?.netBalance || 0) >= 0 ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50'">
-              <i class="pi pi-wallet text-2xl" [class]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"></i>
+            <div class="p-3 rounded-full" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50'">
+              <i class="pi pi-wallet text-2xl" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"></i>
             </div>
           </div>
         </p-card>
