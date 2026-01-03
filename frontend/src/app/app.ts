@@ -4,6 +4,7 @@ import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { HeaderComponent } from './shared/components/header.component';
 import { AuthService } from './core/services/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 /**
  * Root application component.
@@ -30,6 +31,7 @@ import { AuthService } from './core/services/auth.service';
 export class App {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private themeService = inject(ThemeService); // Initialize theme service on app start
   
   showHeader = false;
 
