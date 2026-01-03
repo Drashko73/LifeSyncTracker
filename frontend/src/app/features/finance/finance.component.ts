@@ -206,7 +206,9 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
                     [style.backgroundColor]="transaction.category.colorCode || '#e5e7eb'"
                     [style.color]="getContrastColor(transaction.category.colorCode)"
                   >
-                    <i [class]="transaction.category.icon + ' mr-1'" *ngIf="transaction.category.icon"></i>
+                    @if (transaction.category.icon) {
+                      <i [class]="'pi ' + transaction.category.icon + ' mr-1'"></i>
+                    }
                     {{ transaction.category.name }}
                   </span>
                 </td>
@@ -260,7 +262,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
               <ng-template let-category pTemplate="item">
                 <div class="flex items-center">
                   @if (category.icon) {
-                    <i [class]="category.icon + ' mr-2'"></i>
+                    <i [class]="'pi ' + category.icon + ' mr-2'"></i>
                   }
                   <span>{{ category.name }}</span>
                   <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">

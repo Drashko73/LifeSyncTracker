@@ -230,7 +230,7 @@ export class UserPreferencesService {
     const endDate = new Date();
 
     if (period === 0) {
-      return { startDate: null, endDate };
+      return { startDate: new Date(2000, 0, 1), endDate };
     }
 
     const startDate = new Date();
