@@ -1,6 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, tap, interval, Subscription } from 'rxjs';
+import { Observable, tap, interval, Subscription, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { 
   TimeEntry, 
@@ -13,6 +13,24 @@ import {
   PaginatedResponse,
   ApiResponse 
 } from '../models';
+
+/**
+ * Helper function to format a Date as ISO string with timezone offset.
+ * This ensures the backend receives the time as the user intended.
+ */
+function toLocalISOString(date: Date): string {
+  const offset = -date.getTimezoneOffset();
+  const sign = offset >= 0 ? '+' : '-';
+  const pad = (n: number) => String(Math.floor(Math.abs(n))).padStart(2, '0');
+  
+  return date.getFullYear() +
+    '-' + pad(date.getMonth() + 1) +
+    '-' + pad(date.getDate()) +
+    'T' + pad(date.getHours()) +
+    ':' + pad(date.getMinutes()) +
+    ':' + pad(date.getSeconds()) +
+    sign + pad(offset / 60) + ':' + pad(offset % 60);
+}
 
 /**
  * Service for time tracking operations.
@@ -159,16 +177,28 @@ export class TimeEntryService {
 
   /**
    * Creates a manual time entry.
+   * Converts dates to local ISO format to preserve user's intended time.
    */
   createManualEntry(dto: CreateTimeEntryDto): Observable<ApiResponse<TimeEntry>> {
-    return this.http.post<ApiResponse<TimeEntry>>(this.apiUrl, dto);
+    const payload = {
+      ...dto,
+      startTime: toLocalISOString(dto.startTime),
+      endTime: toLocalISOString(dto.endTime)
+    };
+    return this.http.post<ApiResponse<TimeEntry>>(this.apiUrl, payload);
   }
 
   /**
    * Updates a time entry.
+   * Converts dates to local ISO format to preserve user's intended time.
    */
   update(id: number, dto: UpdateTimeEntryDto): Observable<ApiResponse<TimeEntry>> {
-    return this.http.put<ApiResponse<TimeEntry>>(`${this.apiUrl}/${id}`, dto);
+    const payload = {
+      ...dto,
+      startTime: dto.startTime ? toLocalISOString(dto.startTime) : undefined,
+      endTime: dto.endTime ? toLocalISOString(dto.endTime) : undefined
+    };
+    return this.http.put<ApiResponse<TimeEntry>>(`${this.apiUrl}/${id}`, payload);
   }
 
   /**

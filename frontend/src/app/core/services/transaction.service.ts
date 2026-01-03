@@ -16,6 +16,24 @@ import {
 } from '../models';
 
 /**
+ * Helper function to format a Date as ISO string with timezone offset.
+ * This ensures the backend receives the time as the user intended.
+ */
+function toLocalISOString(date: Date): string {
+  const offset = -date.getTimezoneOffset();
+  const sign = offset >= 0 ? '+' : '-';
+  const pad = (n: number) => String(Math.floor(Math.abs(n))).padStart(2, '0');
+  
+  return date.getFullYear() +
+    '-' + pad(date.getMonth() + 1) +
+    '-' + pad(date.getDate()) +
+    'T' + pad(date.getHours()) +
+    ':' + pad(date.getMinutes()) +
+    ':' + pad(date.getSeconds()) +
+    sign + pad(offset / 60) + ':' + pad(offset % 60);
+}
+
+/**
  * Service for transaction management operations.
  */
 @Injectable({
@@ -78,16 +96,26 @@ export class TransactionService {
 
   /**
    * Creates a new transaction.
+   * Converts date to local ISO format to preserve user's intended date.
    */
   create(dto: CreateTransactionDto): Observable<ApiResponse<Transaction>> {
-    return this.http.post<ApiResponse<Transaction>>(this.apiUrl, dto);
+    const payload = {
+      ...dto,
+      date: toLocalISOString(dto.date)
+    };
+    return this.http.post<ApiResponse<Transaction>>(this.apiUrl, payload);
   }
 
   /**
    * Updates a transaction.
+   * Converts date to local ISO format to preserve user's intended date.
    */
   update(id: number, dto: UpdateTransactionDto): Observable<ApiResponse<Transaction>> {
-    return this.http.put<ApiResponse<Transaction>>(`${this.apiUrl}/${id}`, dto);
+    const payload = {
+      ...dto,
+      date: dto.date ? toLocalISOString(dto.date) : undefined
+    };
+    return this.http.put<ApiResponse<Transaction>>(`${this.apiUrl}/${id}`, payload);
   }
 
   /**
@@ -102,8 +130,8 @@ export class TransactionService {
    */
   getSummary(startDate: Date, endDate: Date): Observable<ApiResponse<FinancialSummary>> {
     const params = new HttpParams()
-      .set('startDate', startDate.toISOString())
-      .set('endDate', endDate.toISOString());
+      .set('startDate', toLocalISOString(startDate))
+      .set('endDate', toLocalISOString(endDate));
     
     return this.http.get<ApiResponse<FinancialSummary>>(`${this.apiUrl}/summary`, { params });
   }

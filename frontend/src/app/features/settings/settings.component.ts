@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
@@ -18,6 +18,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { ProjectService } from '../../core/services/project.service';
 import { TagService } from '../../core/services/tag.service';
 import { TransactionService } from '../../core/services/transaction.service';
+import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import {
   Project,
   Tag,
@@ -29,11 +30,12 @@ import {
   CreateTransactionCategoryDto,
   UpdateTransactionCategoryDto,
   TransactionType,
+  Currency,
   ApiResponse,
 } from '../../core/models';
 
 /**
- * Settings component for managing projects, tags, and transaction categories.
+ * Settings component for managing projects, tags, transaction categories, and user preferences.
  */
 @Component({
   selector: 'app-settings',
@@ -41,6 +43,7 @@ import {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
     ButtonModule,
     CardModule,
     TableModule,
@@ -64,26 +67,97 @@ import {
       <!-- Header -->
       <div class="mb-6">
         <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Settings</h1>
-        <p class="text-gray-500">Manage your projects, tags, and categories</p>
+        <p class="text-gray-500">Manage your preferences, projects, tags, and categories</p>
       </div>
 
       <!-- Tabs -->
       <p-tabs value="0">
         <p-tablist>
           <p-tab value="0">
-            <i class="pi pi-folder mr-2"></i> Projects
+            <i class="pi pi-user mr-2"></i> Preferences
           </p-tab>
           <p-tab value="1">
-            <i class="pi pi-tag mr-2"></i> Tags
+            <i class="pi pi-folder mr-2"></i> Projects
           </p-tab>
           <p-tab value="2">
+            <i class="pi pi-tag mr-2"></i> Tags
+          </p-tab>
+          <p-tab value="3">
             <i class="pi pi-list mr-2"></i> Categories
           </p-tab>
         </p-tablist>
 
         <p-tabpanels>
-          <!-- Projects Tab -->
+          <!-- User Preferences Tab -->
           <p-tabpanel value="0">
+            <p-card>
+              <ng-template pTemplate="header">
+                <div class="p-4 border-b">
+                  <h2 class="text-lg font-semibold text-gray-800">User Preferences</h2>
+                  <p class="text-sm text-gray-500">Customize your application settings</p>
+                </div>
+              </ng-template>
+
+              <div class="p-4 space-y-6">
+                <!-- Currency Selection -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Currency</label>
+                  <p-select
+                    [options]="currencyOptions"
+                    [ngModel]="userPreferencesService.currency()"
+                    (ngModelChange)="onCurrencyChange($event)"
+                    optionLabel="label"
+                    optionValue="value"
+                    styleClass="w-full md:w-1/2"
+                  ></p-select>
+                  <p class="mt-1 text-sm text-gray-500">This will be used as the default currency for new transactions</p>
+                </div>
+
+                <!-- Timezone Selection -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                  <p-select
+                    [options]="userPreferencesService.getCommonTimezones()"
+                    [ngModel]="userPreferencesService.timezone()"
+                    (ngModelChange)="onTimezoneChange($event)"
+                    optionLabel="label"
+                    optionValue="value"
+                    [filter]="true"
+                    filterPlaceholder="Search timezone..."
+                    styleClass="w-full md:w-1/2"
+                  ></p-select>
+                  <p class="mt-1 text-sm text-gray-500">Used for displaying times in your local timezone</p>
+                </div>
+
+                <!-- Default Filter Period -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Default Time Filter</label>
+                  <p-select
+                    [options]="userPreferencesService.getFilterPeriodOptions()"
+                    [ngModel]="userPreferencesService.defaultFilterMonths()"
+                    (ngModelChange)="onFilterPeriodChange($event)"
+                    optionLabel="label"
+                    optionValue="value"
+                    styleClass="w-full md:w-1/2"
+                  ></p-select>
+                  <p class="mt-1 text-sm text-gray-500">Default time period for filtering data in Time Tracking and Finance views</p>
+                </div>
+
+                <!-- Reset Button -->
+                <div class="pt-4 border-t">
+                  <p-button
+                    label="Reset to Defaults"
+                    icon="pi pi-refresh"
+                    severity="secondary"
+                    (onClick)="resetPreferences()"
+                  ></p-button>
+                </div>
+              </div>
+            </p-card>
+          </p-tabpanel>
+
+          <!-- Projects Tab -->
+          <p-tabpanel value="1">
             <p-card>
               <ng-template pTemplate="header">
                 <div class="p-4 border-b flex justify-between items-center">
@@ -184,7 +258,7 @@ import {
           </p-tabpanel>
 
           <!-- Tags Tab -->
-          <p-tabpanel value="1">
+          <p-tabpanel value="2">
             <p-card>
               <ng-template pTemplate="header">
                 <div class="p-4 border-b flex justify-between items-center">
@@ -262,7 +336,7 @@ import {
           </p-tabpanel>
 
           <!-- Categories Tab -->
-          <p-tabpanel value="2">
+          <p-tabpanel value="3">
             <p-card>
               <ng-template pTemplate="header">
                 <div class="p-4 border-b flex justify-between items-center">
@@ -540,6 +614,7 @@ export class SettingsComponent implements OnInit {
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private fb = inject(FormBuilder);
+  protected userPreferencesService = inject(UserPreferencesService);
 
   // Loading states
   isLoadingProjects = signal(true);
@@ -565,6 +640,13 @@ export class SettingsComponent implements OnInit {
   categoryTypes = [
     { label: 'Income', value: TransactionType.Income },
     { label: 'Expense', value: TransactionType.Expense },
+  ];
+
+  // Currency options for preferences
+  currencyOptions = [
+    { label: 'US Dollar ($)', value: Currency.USD },
+    { label: 'Euro (€)', value: Currency.EUR },
+    { label: 'Serbian Dinar (дин.)', value: Currency.RSD },
   ];
 
   // Forms
@@ -593,6 +675,51 @@ export class SettingsComponent implements OnInit {
     this.loadProjects();
     this.loadTags();
     this.loadCategories();
+  }
+
+  // === User Preferences ===
+
+  onCurrencyChange(currency: Currency): void {
+    this.userPreferencesService.setCurrency(currency);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Saved',
+      detail: 'Currency preference updated',
+    });
+  }
+
+  onTimezoneChange(timezone: string): void {
+    this.userPreferencesService.setTimezone(timezone);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Saved',
+      detail: 'Timezone preference updated',
+    });
+  }
+
+  onFilterPeriodChange(months: number): void {
+    this.userPreferencesService.setDefaultFilterMonths(months);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Saved',
+      detail: 'Default filter period updated',
+    });
+  }
+
+  resetPreferences(): void {
+    this.confirmationService.confirm({
+      message: 'Are you sure you want to reset all preferences to defaults?',
+      header: 'Confirm Reset',
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.userPreferencesService.resetPreferences();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Reset',
+          detail: 'Preferences reset to defaults',
+        });
+      },
+    });
   }
 
   // === Projects ===
