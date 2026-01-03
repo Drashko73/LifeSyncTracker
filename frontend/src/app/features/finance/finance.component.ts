@@ -64,7 +64,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
         <p-card styleClass="hover-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-gray-500 text-sm">Total Income</p>
+              <p class="text-gray-500 text-sm">Total Income (Last 12 Months)</p>
               <p class="text-2xl font-bold text-green-600">\${{ summary()?.totalIncome?.toFixed(2) || '0.00' }}</p>
             </div>
             <div class="p-3 rounded-full bg-green-100">
@@ -243,12 +243,13 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
               optionLabel="name" 
               optionValue="id"
               placeholder="Select a category"
-              styleClass="w-full"
-              [group]="true"
+              class="w-full"
             >
               <ng-template let-category pTemplate="item">
                 <div class="flex items-center">
-                  <i [class]="category.icon + ' mr-2'" *ngIf="category.icon"></i>
+                  @if (category.icon) {
+                    <i [class]="category.icon + ' mr-2'"></i>
+                  }
                   <span>{{ category.name }}</span>
                   <span class="ml-2 text-xs text-gray-400">
                     ({{ category.type === 0 ? 'Income' : 'Expense' }})
@@ -348,11 +349,6 @@ export class FinanceComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    // Set default filter to current month
-    const now = new Date();
-    this.filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    this.filterEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-    
     this.loadCategories();
     this.loadTransactions();
     this.loadSummary();
@@ -381,6 +377,7 @@ export class FinanceComponent implements OnInit {
 
     this.transactionService.getAll(filter).subscribe({
       next: (response) => {
+        console.log(response);
         if (response.success && response.data) {
           this.transactions.set(response.data.items);
         }
@@ -400,7 +397,7 @@ export class FinanceComponent implements OnInit {
   }
 
   private loadSummary(): void {
-    const startDate = this.filterStartDate || new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const startDate = this.filterStartDate || new Date(new Date().getFullYear(), new Date().getMonth()-12, 1);
     const endDate = this.filterEndDate || new Date();
 
     this.transactionService.getSummary(startDate, endDate).subscribe({
@@ -416,8 +413,8 @@ export class FinanceComponent implements OnInit {
     const now = new Date();
     this.filterType = null;
     this.filterCategoryId = null;
-    this.filterStartDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    this.filterEndDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    this.filterStartDate = null;
+    this.filterEndDate = null;
     this.loadTransactions();
   }
 
