@@ -63,7 +63,8 @@ export class UserPreferencesService {
           ...DEFAULT_PREFERENCES,
           ...parsed,
         });
-      } catch {
+      } catch (error) {
+        console.warn('Failed to parse user preferences from localStorage, using defaults:', error);
         this.preferencesSignal.set(DEFAULT_PREFERENCES);
       }
     }
