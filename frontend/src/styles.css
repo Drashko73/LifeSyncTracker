@@ -10,6 +10,12 @@
 @source "../index.html";
 
 /* 
+ * Theme Configuration
+ * Enable dark mode with .dark-mode class selector on html element
+ */
+@custom-variant dark (&:where(.dark-mode *));
+
+/* 
  * PrimeNG Compatibility Layer
  * Reset specific Tailwind preflight rules that conflict with PrimeNG component styles
  */
@@ -32,6 +38,16 @@ html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
+/* Dark mode background transition */
+html {
+  transition: background-color 0.2s ease;
+}
+
+html.dark-mode {
+  background-color: #1f2937;
+  color-scheme: dark;
+}
+
 /* Timer Styles */
 .timer-display {
   font-family: ui-monospace, monospace;
@@ -49,12 +65,19 @@ html, body {
   transform: translateY(-2px);
 }
 
-/* Heatmap Colors */
+/* Heatmap Colors - Light Mode */
 .heatmap-0 { background-color: #f3f4f6; }
 .heatmap-1 { background-color: #bbf7d0; }
 .heatmap-2 { background-color: #4ade80; }
 .heatmap-3 { background-color: #16a34a; }
 .heatmap-4 { background-color: #166534; }
+
+/* Heatmap Colors - Dark Mode */
+.dark-mode .heatmap-0 { background-color: #374151; }
+.dark-mode .heatmap-1 { background-color: #065f46; }
+.dark-mode .heatmap-2 { background-color: #047857; }
+.dark-mode .heatmap-3 { background-color: #059669; }
+.dark-mode .heatmap-4 { background-color: #10b981; }
 
 /* Toast Customizations */
 .p-toast {

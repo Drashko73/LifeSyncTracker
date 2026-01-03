@@ -29,13 +29,13 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
   ],
   providers: [MessageService],
   template: `
-    <div class="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
       <p-toast></p-toast>
       
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Dashboard</h1>
-        <p class="text-gray-500">Welcome back! Here's your productivity overview.</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Dashboard</h1>
+        <p class="text-gray-500 dark:text-gray-400">Welcome back! Here's your productivity overview.</p>
       </div>
 
       @if (isLoading()) {
@@ -48,12 +48,12 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
           <!-- Weekly Hours -->
           <p-card styleClass="hover-card">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-blue-100 mr-4">
-                <i class="pi pi-clock text-2xl text-blue-600"></i>
+              <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 mr-4">
+                <i class="pi pi-clock text-2xl text-blue-600 dark:text-blue-400"></i>
               </div>
               <div>
-                <p class="text-gray-500 text-sm">Weekly Hours</p>
-                <p class="text-2xl font-bold text-gray-800">{{ stats()?.weeklyHours?.toFixed(1) || '0' }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Weekly Hours</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ stats()?.weeklyHours?.toFixed(1) || '0' }}</p>
               </div>
             </div>
           </p-card>
@@ -61,12 +61,12 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
           <!-- Monthly Hours -->
           <p-card styleClass="hover-card">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-green-100 mr-4">
-                <i class="pi pi-calendar text-2xl text-green-600"></i>
+              <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/50 mr-4">
+                <i class="pi pi-calendar text-2xl text-green-600 dark:text-green-400"></i>
               </div>
               <div>
-                <p class="text-gray-500 text-sm">Monthly Hours</p>
-                <p class="text-2xl font-bold text-gray-800">{{ stats()?.monthlyHours?.toFixed(1) || '0' }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Monthly Hours</p>
+                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ stats()?.monthlyHours?.toFixed(1) || '0' }}</p>
               </div>
             </div>
           </p-card>
@@ -74,12 +74,12 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
           <!-- Monthly Income -->
           <p-card styleClass="hover-card">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-emerald-100 mr-4">
-                <i class="pi pi-dollar text-2xl text-emerald-600"></i>
+              <div class="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/50 mr-4">
+                <i class="pi pi-dollar text-2xl text-emerald-600 dark:text-emerald-400"></i>
               </div>
               <div>
-                <p class="text-gray-500 text-sm">Monthly Income</p>
-                <p class="text-2xl font-bold text-emerald-600">\{{ formatCurrency(stats()?.monthlyIncome || 0, userPreferencesService.getCurrency()) }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Monthly Income</p>
+                <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">\{{ formatCurrency(stats()?.monthlyIncome || 0, userPreferencesService.getCurrency()) }}</p>
               </div>
             </div>
           </p-card>
@@ -87,12 +87,12 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
           <!-- Monthly Expenses -->
           <p-card styleClass="hover-card">
             <div class="flex items-center">
-              <div class="p-3 rounded-full bg-red-100 mr-4">
-                <i class="pi pi-shopping-cart text-2xl text-red-600"></i>
+              <div class="p-3 rounded-full bg-red-100 dark:bg-red-900/50 mr-4">
+                <i class="pi pi-shopping-cart text-2xl text-red-600 dark:text-red-400"></i>
               </div>
               <div>
-                <p class="text-gray-500 text-sm">Monthly Expenses</p>
-                <p class="text-2xl font-bold text-red-600">\{{ formatCurrency(stats()?.monthlyExpenses || 0, userPreferencesService.getCurrency()) }}</p>
+                <p class="text-gray-500 dark:text-gray-400 text-sm">Monthly Expenses</p>
+                <p class="text-2xl font-bold text-red-600 dark:text-red-400">\{{ formatCurrency(stats()?.monthlyExpenses || 0, userPreferencesService.getCurrency()) }}</p>
               </div>
             </div>
           </p-card>
@@ -130,15 +130,15 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
           <!-- Time Distribution Pie Chart -->
           <p-card>
             <ng-template pTemplate="header">
-              <div class="p-4 border-b">
-                <h2 class="text-lg font-semibold text-gray-800">Time Distribution (This Month)</h2>
+              <div class="p-4 border-b dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Time Distribution (This Month)</h2>
               </div>
             </ng-template>
             <div class="p-4">
               @if (pieChartData()) {
                 <p-chart type="pie" [data]="pieChartData()" [options]="pieChartOptions"></p-chart>
               } @else {
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                   <i class="pi pi-chart-pie text-4xl mb-2"></i>
                   <p>No time data available</p>
                 </div>
@@ -149,15 +149,15 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
           <!-- Monthly Flow Bar Chart -->
           <p-card>
             <ng-template pTemplate="header">
-              <div class="p-4 border-b">
-                <h2 class="text-lg font-semibold text-gray-800">Income vs Expenses (6 Months)</h2>
+              <div class="p-4 border-b dark:border-gray-700">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Income vs Expenses (6 Months)</h2>
               </div>
             </ng-template>
             <div class="p-4">
               @if (barChartData()) {
                 <p-chart type="bar" [data]="barChartData()" [options]="barChartOptions"></p-chart>
               } @else {
-                <div class="text-center py-8 text-gray-500">
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                   <i class="pi pi-chart-bar text-4xl mb-2"></i>
                   <p>No financial data available</p>
                 </div>
@@ -169,8 +169,8 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
         <!-- Productivity Heatmap -->
         <p-card>
           <ng-template pTemplate="header">
-            <div class="p-4 border-b">
-              <h2 class="text-lg font-semibold text-gray-800">Productivity Heatmap</h2>
+            <div class="p-4 border-b dark:border-gray-700">
+              <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Productivity Heatmap</h2>
             </div>
           </ng-template>
           <div class="p-4">
@@ -185,7 +185,7 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
                     ></div>
                   }
                 </div>
-                <div class="flex items-center mt-4 text-sm text-gray-500">
+                <div class="flex items-center mt-4 text-sm text-gray-500 dark:text-gray-400">
                   <span class="mr-2">Less</span>
                   <div class="flex gap-1">
                     <div class="w-3 h-3 rounded-sm heatmap-0"></div>
@@ -198,7 +198,7 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
                 </div>
               </div>
             } @else {
-              <div class="text-center py-8 text-gray-500">
+              <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                 <i class="pi pi-th-large text-4xl mb-2"></i>
                 <p>No productivity data available</p>
               </div>

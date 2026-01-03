@@ -45,15 +45,15 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
   ],
   providers: [MessageService, ConfirmationService],
   template: `
-    <div class="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
       <p-toast></p-toast>
       <p-confirmdialog></p-confirmdialog>
 
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Time Tracking</h1>
-          <p class="text-gray-500">Track your work sessions and manage time entries</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Time Tracking</h1>
+          <p class="text-gray-500 dark:text-gray-400">Track your work sessions and manage time entries</p>
         </div>
         <div class="mt-4 md:mt-0">
           <p-button 
@@ -68,16 +68,16 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
       <p-card class="mb-6" [class]="timeEntryService.isTimerRunning() ? 'ring-2 ring-blue-500' : ''">
         <div class="flex flex-col md:flex-row justify-between items-center">
           <div class="mb-4 md:mb-0">
-            <h2 class="text-lg font-semibold text-gray-800 mb-2">Timer</h2>
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Timer</h2>
             @if (timeEntryService.isTimerRunning()) {
-              <p class="text-gray-500">
+              <p class="text-gray-500 dark:text-gray-400">
                 Project: {{ timeEntryService.runningTimer()?.project?.name || 'No project selected' }}
               </p>
             }
           </div>
           
           <div class="flex items-center space-x-4">
-            <span class="timer-display text-4xl font-mono" [class.text-blue-600]="timeEntryService.isTimerRunning()">
+            <span class="timer-display text-4xl font-mono dark:text-gray-100" [ngClass]="{'text-blue-600 dark:text-blue-400': timeEntryService.isTimerRunning()}">
               {{ timeEntryService.formatElapsedTime(timeEntryService.elapsedSeconds()) }}
             </span>
             
@@ -106,7 +106,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
       <p-card class="mb-6">
         <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Period</label>
             <p-select 
               [options]="userPreferencesService.getFilterPeriodOptions()" 
               [(ngModel)]="filterPeriod" 
@@ -117,7 +117,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></p-select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
             <p-select 
               [options]="projects()" 
               [(ngModel)]="filterProjectId" 
@@ -130,7 +130,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></p-select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
             <p-datepicker 
               [(ngModel)]="filterStartDate" 
               dateFormat="yy-mm-dd"
@@ -140,7 +140,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></p-datepicker>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
             <p-datepicker 
               [(ngModel)]="filterEndDate" 
               dateFormat="yy-mm-dd"
@@ -158,8 +158,8 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
       <!-- Time Entries Table -->
       <p-card>
         <ng-template pTemplate="header">
-          <div class="p-4 border-b">
-            <h2 class="text-lg font-semibold text-gray-800">Time Entries</h2>
+          <div class="p-4 border-b dark:border-gray-700">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Time Entries</h2>
           </div>
         </ng-template>
         
@@ -198,7 +198,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
                       {{ entry.project.name }}
                     </span>
                   } @else {
-                    <span class="text-gray-400">No project</span>
+                    <span class="text-gray-400 dark:text-gray-500">No project</span>
                   }
                 </td>
                 <td>{{ formatDuration(entry.durationMinutes) }}</td>
@@ -213,7 +213,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             </ng-template>
             <ng-template pTemplate="emptymessage">
               <tr>
-                <td colspan="5" class="text-center py-8 text-gray-500">
+                <td colspan="5" class="text-center py-8 text-gray-500 dark:text-gray-400">
                   No time entries found. Start tracking your time!
                 </td>
               </tr>
@@ -232,7 +232,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
       >
         <form [formGroup]="stopTimerForm">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
             <p-select 
               [options]="projects()" 
               formControlName="projectId" 
@@ -244,7 +244,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></p-select>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">What have I done?</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">What have I done?</label>
             <textarea 
               pTextarea 
               formControlName="description" 
@@ -254,7 +254,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">What should be done next?</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">What should be done next?</label>
             <textarea 
               pTextarea 
               formControlName="nextSteps" 
@@ -264,7 +264,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
             <p-multiselect 
               [options]="tags()" 
               formControlName="tagIds" 
@@ -292,7 +292,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
         <form [formGroup]="manualEntryForm">
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
               <p-datepicker 
                 formControlName="startTime" 
                 [showTime]="true" 
@@ -302,7 +302,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
               ></p-datepicker>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
               <p-datepicker 
                 formControlName="endTime" 
                 [showTime]="true" 
@@ -313,7 +313,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             </div>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
             <p-select 
               [options]="projects()" 
               formControlName="projectId" 
@@ -325,7 +325,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></p-select>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
             <textarea 
               pTextarea 
               formControlName="description" 
@@ -335,7 +335,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Next Steps</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Next Steps</label>
             <textarea 
               pTextarea 
               formControlName="nextSteps" 
@@ -345,7 +345,7 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
             <p-multiselect 
               [options]="tags()" 
               formControlName="tagIds" 

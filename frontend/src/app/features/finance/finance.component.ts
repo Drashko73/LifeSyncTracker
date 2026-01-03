@@ -41,15 +41,15 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
   ],
   providers: [MessageService, ConfirmationService],
   template: `
-    <div class="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
       <p-toast></p-toast>
       <p-confirmdialog></p-confirmdialog>
 
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Finance Tracking</h1>
-          <p class="text-gray-500">Track your income and expenses</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Finance Tracking</h1>
+          <p class="text-gray-500 dark:text-gray-400">Track your income and expenses</p>
         </div>
         <div class="mt-4 md:mt-0">
           <p-button 
@@ -65,23 +65,11 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
         <p-card styleClass="hover-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-gray-500 text-sm">Total Income</p>
-              <p class="text-2xl font-bold text-green-600">\{{ formatCurrency(summary()?.totalIncome || 0, userPreferencesService.getCurrency()) }}</p>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">Total Income</p>
+              <p class="text-2xl font-bold text-green-600 dark:text-green-400">\{{ formatCurrency(summary()?.totalIncome || 0, userPreferencesService.getCurrency()) }}</p>
             </div>
-            <div class="p-3 rounded-full bg-green-100">
-              <i class="pi pi-arrow-up text-2xl text-green-600"></i>
-            </div>
-          </div>
-        </p-card>
-
-        <p-card styleClass="hover-card">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-gray-500 text-sm">Total Expenses</p>
-              <p class="text-2xl font-bold text-red-600">\{{ formatCurrency(summary()?.totalExpenses || 0, userPreferencesService.getCurrency()) }}</p>
-            </div>
-            <div class="p-3 rounded-full bg-red-100">
-              <i class="pi pi-arrow-down text-2xl text-red-600"></i>
+            <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/50">
+              <i class="pi pi-arrow-up text-2xl text-green-600 dark:text-green-400"></i>
             </div>
           </div>
         </p-card>
@@ -89,13 +77,25 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
         <p-card styleClass="hover-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-gray-500 text-sm">Net Balance</p>
-              <p class="text-2xl font-bold" [class]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600' : 'text-red-600'">
+              <p class="text-gray-500 dark:text-gray-400 text-sm">Total Expenses</p>
+              <p class="text-2xl font-bold text-red-600 dark:text-red-400">\{{ formatCurrency(summary()?.totalExpenses || 0, userPreferencesService.getCurrency()) }}</p>
+            </div>
+            <div class="p-3 rounded-full bg-red-100 dark:bg-red-900/50">
+              <i class="pi pi-arrow-down text-2xl text-red-600 dark:text-red-400"></i>
+            </div>
+          </div>
+        </p-card>
+
+        <p-card styleClass="hover-card">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-gray-500 dark:text-gray-400 text-sm">Net Balance</p>
+              <p class="text-2xl font-bold" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
                 \{{ formatCurrency(summary()?.netBalance || 0, userPreferencesService.getCurrency()) }}
               </p>
             </div>
-            <div class="p-3 rounded-full" [class]="(summary()?.netBalance || 0) >= 0 ? 'bg-green-100' : 'bg-red-100'">
-              <i class="pi pi-wallet text-2xl" [class]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600' : 'text-red-600'"></i>
+            <div class="p-3 rounded-full" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50'">
+              <i class="pi pi-wallet text-2xl" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"></i>
             </div>
           </div>
         </p-card>
@@ -105,7 +105,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
       <p-card class="mb-6">
         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Period</label>
             <p-select 
               [options]="userPreferencesService.getFilterPeriodOptions()" 
               [(ngModel)]="filterPeriod" 
@@ -116,7 +116,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             ></p-select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
             <p-select 
               [options]="transactionTypes" 
               [(ngModel)]="filterType" 
@@ -129,7 +129,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             ></p-select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
             <p-select 
               [options]="categories()" 
               [(ngModel)]="filterCategoryId" 
@@ -142,7 +142,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             ></p-select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
             <p-datepicker 
               [(ngModel)]="filterStartDate" 
               dateFormat="yy-mm-dd"
@@ -152,7 +152,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             ></p-datepicker>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
             <p-datepicker 
               [(ngModel)]="filterEndDate" 
               dateFormat="yy-mm-dd"
@@ -170,8 +170,8 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
       <!-- Transactions Table -->
       <p-card>
         <ng-template pTemplate="header">
-          <div class="p-4 border-b flex justify-between items-center">
-            <h2 class="text-lg font-semibold text-gray-800">Transactions</h2>
+          <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Transactions</h2>
           </div>
         </ng-template>
         
@@ -212,11 +212,11 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
                 </td>
                 <td class="max-w-xs truncate">{{ transaction.description || '-' }}</td>
                 <td>
-                  <span [class]="transaction.category.type === 0 ? 'text-green-600' : 'text-red-600'" class="font-semibold">
+                  <span [class]="transaction.category.type === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'" class="font-semibold">
                     {{ transaction.category.type === 0 ? '+' : '-' }}{{ formatCurrency(transaction.amount, transaction.currency) }}
                   </span>
                   @if (transaction.isAutoGenerated) {
-                    <span class="ml-2 text-xs text-gray-400">(auto)</span>
+                    <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">(auto)</span>
                   }
                 </td>
                 <td>
@@ -229,7 +229,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             </ng-template>
             <ng-template pTemplate="emptymessage">
               <tr>
-                <td colspan="5" class="text-center py-8 text-gray-500">
+                <td colspan="5" class="text-center py-8 text-gray-500 dark:text-gray-400">
                   No transactions found. Add your first transaction!
                 </td>
               </tr>
@@ -248,7 +248,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
       >
         <form [formGroup]="transactionForm">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Category *</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category *</label>
             <p-select 
               [options]="categories()" 
               formControlName="categoryId" 
@@ -263,7 +263,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
                     <i [class]="category.icon + ' mr-2'"></i>
                   }
                   <span>{{ category.name }}</span>
-                  <span class="ml-2 text-xs text-gray-400">
+                  <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">
                     ({{ category.type === 0 ? 'Income' : 'Expense' }})
                   </span>
                 </div>
@@ -272,7 +272,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
           </div>
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount *</label>
               <p-inputnumber 
                 formControlName="amount" 
                 [min]="0.01"
@@ -280,7 +280,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
               ></p-inputnumber>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Currency</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
               <p-select 
                 [options]="currencies" 
                 formControlName="currency" 
@@ -291,7 +291,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             </div>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
             <p-datepicker 
               formControlName="date" 
               dateFormat="yy-mm-dd"
@@ -300,7 +300,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             ></p-datepicker>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
             <input 
               pInputText 
               formControlName="description" 

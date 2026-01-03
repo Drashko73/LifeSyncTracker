@@ -7,6 +7,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { RippleModule } from 'primeng/ripple';
 import { AuthService } from '../../core/services/auth.service';
 import { TimeEntryService } from '../../core/services/time-entry.service';
+import { ThemeService } from '../../core/services/theme.service';
 
 /**
  * Shared header component with navigation and timer status.
@@ -24,14 +25,14 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
     RippleModule
   ],
   template: `
-    <header class="bg-white shadow-sm border-b">
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b dark:border-gray-700 transition-colors">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
           <!-- Logo -->
           <div class="flex items-center">
             <a routerLink="/dashboard" class="flex items-center">
               <i class="pi pi-clock text-2xl text-blue-600 mr-2"></i>
-              <span class="text-xl font-bold text-gray-800">LifeSync</span>
+              <span class="text-xl font-bold text-gray-800 dark:text-gray-100">LifeSync</span>
             </a>
           </div>
 
@@ -39,29 +40,29 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
           <nav class="hidden md:flex items-center space-x-4">
             <a 
               routerLink="/dashboard" 
-              routerLinkActive="text-blue-600 bg-blue-50" 
-              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+              routerLinkActive="text-blue-600 bg-blue-50 dark:bg-blue-900/50" 
+              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
               <i class="pi pi-home mr-1"></i> Dashboard
             </a>
             <a 
               routerLink="/time-tracking" 
-              routerLinkActive="text-blue-600 bg-blue-50" 
-              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+              routerLinkActive="text-blue-600 bg-blue-50 dark:bg-blue-900/50" 
+              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
               <i class="pi pi-clock mr-1"></i> Time Tracking
             </a>
             <a 
               routerLink="/finance" 
-              routerLinkActive="text-blue-600 bg-blue-50" 
-              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+              routerLinkActive="text-blue-600 bg-blue-50 dark:bg-blue-900/50" 
+              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
               <i class="pi pi-dollar mr-1"></i> Finance
             </a>
             <a 
               routerLink="/settings" 
-              routerLinkActive="text-blue-600 bg-blue-50" 
-              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition"
+              routerLinkActive="text-blue-600 bg-blue-50 dark:bg-blue-900/50" 
+              class="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition"
             >
               <i class="pi pi-cog mr-1"></i> Settings
             </a>
@@ -71,11 +72,11 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
           <div class="flex items-center space-x-4">
             <!-- Quick Timer Status -->
             @if (timeEntryService.isTimerRunning()) {
-              <div class="hidden sm:flex items-center bg-blue-50 px-3 py-1 rounded-full">
+              <div class="hidden sm:flex items-center bg-blue-50 dark:bg-blue-900/50 px-3 py-1 rounded-full">
                 <div class="animate-pulse mr-2">
                   <div class="w-2 h-2 bg-red-500 rounded-full"></div>
                 </div>
-                <span class="text-sm font-mono text-blue-600">
+                <span class="text-sm font-mono text-blue-600 dark:text-blue-400">
                   {{ timeEntryService.formatElapsedTime(timeEntryService.elapsedSeconds()) }}
                 </span>
               </div>
@@ -96,12 +97,12 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
       </div>
 
       <!-- Mobile Navigation -->
-      <div class="md:hidden border-t">
+      <div class="md:hidden border-t dark:border-gray-700">
         <div class="flex justify-around py-2">
           <a 
             routerLink="/dashboard" 
             routerLinkActive="text-blue-600" 
-            class="flex flex-col items-center text-gray-600 text-xs"
+            class="flex flex-col items-center text-gray-600 dark:text-gray-300 text-xs"
           >
             <i class="pi pi-home text-lg"></i>
             <span>Dashboard</span>
@@ -109,7 +110,7 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
           <a 
             routerLink="/time-tracking" 
             routerLinkActive="text-blue-600" 
-            class="flex flex-col items-center text-gray-600 text-xs"
+            class="flex flex-col items-center text-gray-600 dark:text-gray-300 text-xs"
           >
             <i class="pi pi-clock text-lg"></i>
             <span>Time</span>
@@ -117,7 +118,7 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
           <a 
             routerLink="/finance" 
             routerLinkActive="text-blue-600" 
-            class="flex flex-col items-center text-gray-600 text-xs"
+            class="flex flex-col items-center text-gray-600 dark:text-gray-300 text-xs"
           >
             <i class="pi pi-dollar text-lg"></i>
             <span>Finance</span>
@@ -125,7 +126,7 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
           <a 
             routerLink="/settings" 
             routerLinkActive="text-blue-600" 
-            class="flex flex-col items-center text-gray-600 text-xs"
+            class="flex flex-col items-center text-gray-600 dark:text-gray-300 text-xs"
           >
             <i class="pi pi-cog text-lg"></i>
             <span>Settings</span>
@@ -138,6 +139,7 @@ import { TimeEntryService } from '../../core/services/time-entry.service';
 export class HeaderComponent {
   protected authService = inject(AuthService);
   protected timeEntryService = inject(TimeEntryService);
+  protected themeService = inject(ThemeService);
 
   menuItems = [
     {

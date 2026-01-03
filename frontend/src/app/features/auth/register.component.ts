@@ -28,19 +28,19 @@ import { AuthService } from '../../core/services/auth.service';
   ],
   providers: [MessageService],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
+    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 px-4 transition-colors">
       <p-toast></p-toast>
       <p-card class="w-full max-w-md">
         <ng-template pTemplate="header">
           <div class="text-center pt-6">
-            <h1 class="text-2xl font-bold text-gray-800">Create Account</h1>
-            <p class="text-gray-500 mt-2">Start tracking your time and finances</p>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Create Account</h1>
+            <p class="text-gray-500 dark:text-gray-400 mt-2">Start tracking your time and finances</p>
           </div>
         </ng-template>
         
         <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="p-4">
           <div class="mb-4">
-            <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Username
             </label>
             <input 
@@ -56,7 +56,7 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
 
           <div class="mb-4">
-            <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Email
             </label>
             <input 
@@ -73,7 +73,7 @@ import { AuthService } from '../../core/services/auth.service';
           </div>
 
           <div class="mb-6">
-            <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
+            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Password
             </label>
             <p-password 
@@ -100,9 +100,9 @@ import { AuthService } from '../../core/services/auth.service';
 
         <ng-template pTemplate="footer">
           <div class="text-center pb-4">
-            <p class="text-gray-500">
+            <p class="text-gray-500 dark:text-gray-400">
               Already have an account? 
-              <a routerLink="/auth/login" class="text-blue-600 hover:underline font-medium">Sign in</a>
+              <a routerLink="/auth/login" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Sign in</a>
             </p>
           </div>
         </ng-template>

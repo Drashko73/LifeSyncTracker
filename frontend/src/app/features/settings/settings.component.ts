@@ -19,6 +19,7 @@ import { ProjectService } from '../../core/services/project.service';
 import { TagService } from '../../core/services/tag.service';
 import { TransactionService } from '../../core/services/transaction.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
+import { ThemeService, ThemeMode } from '../../core/services/theme.service';
 import {
   Project,
   Tag,
@@ -60,14 +61,14 @@ import {
   ],
   providers: [MessageService, ConfirmationService],
   template: `
-    <div class="p-4 md:p-6 bg-gray-50 min-h-screen">
+    <div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
       <p-toast></p-toast>
       <p-confirmdialog></p-confirmdialog>
 
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Settings</h1>
-        <p class="text-gray-500">Manage your preferences, projects, tags, and categories</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Settings</h1>
+        <p class="text-gray-500 dark:text-gray-400">Manage your preferences, projects, tags, and categories</p>
       </div>
 
       <!-- Tabs -->
@@ -92,16 +93,45 @@ import {
           <p-tabpanel value="0">
             <p-card>
               <ng-template pTemplate="header">
-                <div class="p-4 border-b">
-                  <h2 class="text-lg font-semibold text-gray-800">User Preferences</h2>
-                  <p class="text-sm text-gray-500">Customize your application settings</p>
+                <div class="p-4 border-b dark:border-gray-700">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">User Preferences</h2>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">Customize your application settings</p>
                 </div>
               </ng-template>
 
               <div class="p-4 space-y-6">
+                <!-- Theme Selection -->
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Theme</label>
+                  <p-select
+                    [options]="themeService.getThemeModeOptions()"
+                    [ngModel]="themeService.themeMode()"
+                    (ngModelChange)="onThemeChange($event)"
+                    optionLabel="label"
+                    optionValue="value"
+                    styleClass="w-full md:w-1/2"
+                  >
+                    <ng-template pTemplate="selectedItem" let-item>
+                      @if (item) {
+                        <div class="flex items-center">
+                          <i [class]="item.icon + ' mr-2'"></i>
+                          <span>{{ item.label }}</span>
+                        </div>
+                      }
+                    </ng-template>
+                    <ng-template pTemplate="item" let-item>
+                      <div class="flex items-center">
+                        <i [class]="item.icon + ' mr-2'"></i>
+                        <span>{{ item.label }}</span>
+                      </div>
+                    </ng-template>
+                  </p-select>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Choose how the application looks. System follows your device settings.</p>
+                </div>
+
                 <!-- Currency Selection -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Currency</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Preferred Currency</label>
                   <p-select
                     [options]="currencyOptions"
                     [ngModel]="userPreferencesService.currency()"
@@ -110,12 +140,12 @@ import {
                     optionValue="value"
                     styleClass="w-full md:w-1/2"
                   ></p-select>
-                  <p class="mt-1 text-sm text-gray-500">This will be used as the default currency for new transactions</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">This will be used as the default currency for new transactions</p>
                 </div>
 
                 <!-- Timezone Selection -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Timezone</label>
                   <p-select
                     [options]="userPreferencesService.getCommonTimezones()"
                     [ngModel]="userPreferencesService.timezone()"
@@ -126,12 +156,12 @@ import {
                     filterPlaceholder="Search timezone..."
                     styleClass="w-full md:w-1/2"
                   ></p-select>
-                  <p class="mt-1 text-sm text-gray-500">Used for displaying times in your local timezone</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Used for displaying times in your local timezone</p>
                 </div>
 
                 <!-- Default Filter Period -->
                 <div>
-                  <label class="block text-sm font-medium text-gray-700 mb-2">Default Time Filter</label>
+                  <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Default Time Filter</label>
                   <p-select
                     [options]="userPreferencesService.getFilterPeriodOptions()"
                     [ngModel]="userPreferencesService.defaultFilterMonths()"
@@ -140,11 +170,11 @@ import {
                     optionValue="value"
                     styleClass="w-full md:w-1/2"
                   ></p-select>
-                  <p class="mt-1 text-sm text-gray-500">Default time period for filtering data in Time Tracking and Finance views</p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Default time period for filtering data in Time Tracking and Finance views</p>
                 </div>
 
                 <!-- Reset Button -->
-                <div class="pt-4 border-t">
+                <div class="pt-4 border-t dark:border-gray-700">
                   <p-button
                     label="Reset to Defaults"
                     icon="pi pi-refresh"
@@ -160,8 +190,8 @@ import {
           <p-tabpanel value="1">
             <p-card>
               <ng-template pTemplate="header">
-                <div class="p-4 border-b flex justify-between items-center">
-                  <h2 class="text-lg font-semibold text-gray-800">Projects</h2>
+                <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Projects</h2>
                   <p-button
                     label="Add Project"
                     icon="pi pi-plus"
@@ -247,7 +277,7 @@ import {
                 </ng-template>
                 <ng-template pTemplate="emptymessage">
                   <tr>
-                    <td colspan="6" class="text-center py-8 text-gray-500">
+                    <td colspan="6" class="text-center py-8 text-gray-500 dark:text-gray-400">
                       No projects found. Create your first project!
                     </td>
                   </tr>
@@ -261,8 +291,8 @@ import {
           <p-tabpanel value="2">
             <p-card>
               <ng-template pTemplate="header">
-                <div class="p-4 border-b flex justify-between items-center">
-                  <h2 class="text-lg font-semibold text-gray-800">Tags</h2>
+                <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Tags</h2>
                   <p-button
                     label="Add Tag"
                     icon="pi pi-plus"
@@ -325,7 +355,7 @@ import {
                 </ng-template>
                 <ng-template pTemplate="emptymessage">
                   <tr>
-                    <td colspan="4" class="text-center py-8 text-gray-500">
+                    <td colspan="4" class="text-center py-8 text-gray-500 dark:text-gray-400">
                       No tags found. Create your first tag!
                     </td>
                   </tr>
@@ -339,8 +369,8 @@ import {
           <p-tabpanel value="3">
             <p-card>
               <ng-template pTemplate="header">
-                <div class="p-4 border-b flex justify-between items-center">
-                  <h2 class="text-lg font-semibold text-gray-800">Transaction Categories</h2>
+                <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
+                  <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Transaction Categories</h2>
                   <p-button
                     label="Add Category"
                     icon="pi pi-plus"
@@ -426,14 +456,14 @@ import {
                         ></p-button>
                       </div>
                       } @else {
-                      <span class="text-gray-400 text-sm">Protected</span>
+                      <span class="text-gray-400 dark:text-gray-500 text-sm">Protected</span>
                       }
                     </td>
                   </tr>
                 </ng-template>
                 <ng-template pTemplate="emptymessage">
                   <tr>
-                    <td colspan="5" class="text-center py-8 text-gray-500">
+                    <td colspan="5" class="text-center py-8 text-gray-500 dark:text-gray-400">
                       No categories found. Create your first category!
                     </td>
                   </tr>
@@ -455,11 +485,11 @@ import {
       >
         <form [formGroup]="projectForm">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
             <input pInputText formControlName="name" class="w-full" placeholder="Project name" />
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
             <input
               pInputText
               formControlName="description"
@@ -468,11 +498,11 @@ import {
             />
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
             <p-colorpicker formControlName="colorCode"></p-colorpicker>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Hourly Rate</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hourly Rate</label>
             <p-inputnumber
               formControlName="hourlyRate"
               mode="currency"
@@ -520,11 +550,11 @@ import {
       >
         <form [formGroup]="tagForm">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
             <input pInputText formControlName="name" class="w-full" placeholder="Tag name" />
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
             <p-colorpicker formControlName="colorCode"></p-colorpicker>
           </div>
         </form>
@@ -554,7 +584,7 @@ import {
       >
         <form [formGroup]="categoryForm">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name *</label>
             <input
               pInputText
               formControlName="name"
@@ -564,7 +594,7 @@ import {
           </div>
           @if (!editingCategory) {
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Type *</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type *</label>
             <p-select
               [options]="categoryTypes"
               formControlName="type"
@@ -576,7 +606,7 @@ import {
           </div>
           }
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Icon (PrimeIcons class)</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Icon (PrimeIcons class)</label>
             <input
               pInputText
               formControlName="icon"
@@ -585,7 +615,7 @@ import {
             />
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Color</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Color</label>
             <p-colorpicker formControlName="colorCode"></p-colorpicker>
           </div>
         </form>
@@ -615,6 +645,7 @@ export class SettingsComponent implements OnInit {
   private confirmationService = inject(ConfirmationService);
   private fb = inject(FormBuilder);
   protected userPreferencesService = inject(UserPreferencesService);
+  protected themeService = inject(ThemeService);
 
   // Loading states
   isLoadingProjects = signal(true);
@@ -678,6 +709,15 @@ export class SettingsComponent implements OnInit {
   }
 
   // === User Preferences ===
+
+  onThemeChange(theme: ThemeMode): void {
+    this.themeService.setThemeMode(theme);
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Saved',
+      detail: 'Theme preference updated',
+    });
+  }
 
   onCurrencyChange(currency: Currency): void {
     this.userPreferencesService.setCurrency(currency);
