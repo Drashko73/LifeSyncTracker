@@ -14,6 +14,7 @@ import { ConfirmDialog } from 'primeng/confirmdialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TransactionService } from '../../core/services/transaction.service';
+import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import { Transaction, TransactionCategory, TransactionType, Currency, TransactionFilterDto, FinancialSummary, ApiResponse, PaginatedResponse } from '../../core/models';
 
 /**
@@ -102,7 +103,18 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
 
       <!-- Filters -->
       <p-card class="mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+            <p-select 
+              [options]="userPreferencesService.getFilterPeriodOptions()" 
+              [(ngModel)]="filterPeriod" 
+              optionLabel="label" 
+              optionValue="value"
+              styleClass="w-full"
+              (onChange)="onFilterPeriodChange()"
+            ></p-select>
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
             <p-select 
@@ -315,6 +327,7 @@ export class FinanceComponent implements OnInit {
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private fb = inject(FormBuilder);
+  protected userPreferencesService = inject(UserPreferencesService);
 
   isLoading = signal(true);
   transactions = signal<Transaction[]>([]);
@@ -324,6 +337,7 @@ export class FinanceComponent implements OnInit {
   showTransactionDialog = false;
   editingTransaction: Transaction | null = null;
 
+  filterPeriod: number = 6;
   filterType: TransactionType | null = null;
   filterCategoryId: number | null = null;
   filterStartDate: Date | null = null;
@@ -349,6 +363,15 @@ export class FinanceComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Initialize from user preferences
+    this.filterPeriod = this.userPreferencesService.defaultFilterMonths();
+    this.applyFilterPeriod();
+    
+    // Set default currency from preferences
+    this.transactionForm.patchValue({
+      currency: this.userPreferencesService.currency()
+    });
+    
     this.loadCategories();
     this.loadTransactions();
     this.loadSummary();
@@ -362,6 +385,17 @@ export class FinanceComponent implements OnInit {
         }
       }
     });
+  }
+
+  onFilterPeriodChange(): void {
+    this.applyFilterPeriod();
+    this.loadTransactions();
+  }
+
+  private applyFilterPeriod(): void {
+    const { startDate, endDate } = this.userPreferencesService.getDateRangeForPeriod(this.filterPeriod);
+    this.filterStartDate = startDate;
+    this.filterEndDate = endDate;
   }
 
   loadTransactions(): void {
@@ -410,11 +444,10 @@ export class FinanceComponent implements OnInit {
   }
 
   clearFilters(): void {
-    const now = new Date();
+    this.filterPeriod = this.userPreferencesService.defaultFilterMonths();
     this.filterType = null;
     this.filterCategoryId = null;
-    this.filterStartDate = null;
-    this.filterEndDate = null;
+    this.applyFilterPeriod();
     this.loadTransactions();
   }
 
@@ -423,7 +456,7 @@ export class FinanceComponent implements OnInit {
     this.transactionForm.reset({
       categoryId: null,
       amount: 0,
-      currency: Currency.USD,
+      currency: this.userPreferencesService.currency(),
       date: new Date(),
       description: ''
     });

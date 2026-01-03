@@ -17,6 +17,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { TimeEntryService } from '../../core/services/time-entry.service';
 import { ProjectService } from '../../core/services/project.service';
 import { TagService } from '../../core/services/tag.service';
+import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../core/models';
 
 /**
@@ -103,7 +104,18 @@ import { TimeEntry, Project, Tag, TimeEntryFilterDto, ApiResponse } from '../../
 
       <!-- Filters -->
       <p-card class="mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Time Period</label>
+            <p-select 
+              [options]="userPreferencesService.getFilterPeriodOptions()" 
+              [(ngModel)]="filterPeriod" 
+              optionLabel="label" 
+              optionValue="value"
+              styleClass="w-full"
+              (onChange)="onFilterPeriodChange()"
+            ></p-select>
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Project</label>
             <p-select 
@@ -359,6 +371,7 @@ export class TimeTrackingComponent implements OnInit {
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private fb = inject(FormBuilder);
+  protected userPreferencesService = inject(UserPreferencesService);
 
   isLoading = signal(true);
   timeEntries = signal<TimeEntry[]>([]);
@@ -369,6 +382,7 @@ export class TimeTrackingComponent implements OnInit {
   showManualDialog = false;
   editingEntry: TimeEntry | null = null;
 
+  filterPeriod: number = 6;
   filterProjectId: number | null = null;
   filterStartDate: Date | null = null;
   filterEndDate: Date | null = null;
@@ -390,9 +404,24 @@ export class TimeTrackingComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Initialize from user preferences
+    this.filterPeriod = this.userPreferencesService.defaultFilterMonths();
+    this.applyFilterPeriod();
+    
     this.loadProjects();
     this.loadTags();
     this.loadTimeEntries();
+  }
+
+  onFilterPeriodChange(): void {
+    this.applyFilterPeriod();
+    this.loadTimeEntries();
+  }
+
+  private applyFilterPeriod(): void {
+    const { startDate, endDate } = this.userPreferencesService.getDateRangeForPeriod(this.filterPeriod);
+    this.filterStartDate = startDate;
+    this.filterEndDate = endDate;
   }
 
   private loadProjects(): void {
@@ -444,9 +473,9 @@ export class TimeTrackingComponent implements OnInit {
   }
 
   clearFilters(): void {
+    this.filterPeriod = this.userPreferencesService.defaultFilterMonths();
     this.filterProjectId = null;
-    this.filterStartDate = null;
-    this.filterEndDate = null;
+    this.applyFilterPeriod();
     this.loadTimeEntries();
   }
 

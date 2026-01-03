@@ -14,6 +14,7 @@ import {
   PaginatedResponse,
   ApiResponse 
 } from '../models';
+import { toLocalISOString } from '../utils/date-utils';
 
 /**
  * Service for transaction management operations.
@@ -78,16 +79,26 @@ export class TransactionService {
 
   /**
    * Creates a new transaction.
+   * Converts date to local ISO format to preserve user's intended date.
    */
   create(dto: CreateTransactionDto): Observable<ApiResponse<Transaction>> {
-    return this.http.post<ApiResponse<Transaction>>(this.apiUrl, dto);
+    const payload = {
+      ...dto,
+      date: toLocalISOString(dto.date)
+    };
+    return this.http.post<ApiResponse<Transaction>>(this.apiUrl, payload);
   }
 
   /**
    * Updates a transaction.
+   * Converts date to local ISO format to preserve user's intended date.
    */
   update(id: number, dto: UpdateTransactionDto): Observable<ApiResponse<Transaction>> {
-    return this.http.put<ApiResponse<Transaction>>(`${this.apiUrl}/${id}`, dto);
+    const payload = {
+      ...dto,
+      date: dto.date ? toLocalISOString(dto.date) : undefined
+    };
+    return this.http.put<ApiResponse<Transaction>>(`${this.apiUrl}/${id}`, payload);
   }
 
   /**
@@ -102,8 +113,8 @@ export class TransactionService {
    */
   getSummary(startDate: Date, endDate: Date): Observable<ApiResponse<FinancialSummary>> {
     const params = new HttpParams()
-      .set('startDate', startDate.toISOString())
-      .set('endDate', endDate.toISOString());
+      .set('startDate', toLocalISOString(startDate))
+      .set('endDate', toLocalISOString(endDate));
     
     return this.http.get<ApiResponse<FinancialSummary>>(`${this.apiUrl}/summary`, { params });
   }
