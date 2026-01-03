@@ -654,8 +654,8 @@ export class SettingsComponent implements OnInit {
         description: formValue.description || undefined,
         colorCode: formValue.colorCode || undefined,
         hourlyRate: formValue.hourlyRate || undefined,
-        autoCreateIncome: formValue.autoCreateIncome ?? undefined,
-        isActive: formValue.isActive ?? undefined,
+        autoCreateIncome: formValue.autoCreateIncome === true ? true : formValue.autoCreateIncome === false ? false : undefined,
+        isActive: formValue.isActive === true ? true : formValue.isActive === false ? false : undefined,
       };
       this.projectService.update(this.editingProject.id, dto).subscribe({
         next: (response) => {

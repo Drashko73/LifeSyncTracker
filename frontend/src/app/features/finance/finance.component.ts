@@ -454,7 +454,7 @@ export class FinanceComponent implements OnInit {
       this.transactionService.update(this.editingTransaction.id, {
         categoryId: formValue.categoryId!,
         amount: formValue.amount!,
-        currency: formValue.currency ?? undefined,
+        currency: formValue.currency ?? Currency.USD,
         date: formValue.date!,
         description: formValue.description || undefined
       }).subscribe({
@@ -481,7 +481,7 @@ export class FinanceComponent implements OnInit {
       this.transactionService.create({
         categoryId: formValue.categoryId!,
         amount: formValue.amount!,
-        currency: formValue.currency ?? undefined,
+        currency: formValue.currency ?? Currency.USD,
         date: formValue.date!,
         description: formValue.description || undefined
       }).subscribe({
