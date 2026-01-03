@@ -187,6 +187,15 @@ export enum TransactionType {
 }
 
 /**
+ * Currency enum.
+ */
+export enum Currency {
+  USD = 0,
+  EUR = 1,
+  RSD = 2
+}
+
+/**
  * Transaction category model.
  */
 export interface TransactionCategory {
@@ -209,11 +218,21 @@ export interface CreateTransactionCategoryDto {
 }
 
 /**
+ * DTO for updating a transaction category.
+ */
+export interface UpdateTransactionCategoryDto {
+  name?: string;
+  icon?: string;
+  colorCode?: string;
+}
+
+/**
  * Transaction model.
  */
 export interface Transaction {
   id: number;
   amount: number;
+  currency: Currency;
   date: Date;
   category: TransactionCategory;
   description?: string;
@@ -227,6 +246,7 @@ export interface Transaction {
  */
 export interface CreateTransactionDto {
   amount: number;
+  currency?: Currency;
   date: Date;
   categoryId: number;
   description?: string;
@@ -237,6 +257,7 @@ export interface CreateTransactionDto {
  */
 export interface UpdateTransactionDto {
   amount?: number;
+  currency?: Currency;
   date?: Date;
   categoryId?: number;
   description?: string;

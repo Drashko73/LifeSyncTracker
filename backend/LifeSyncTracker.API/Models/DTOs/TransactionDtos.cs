@@ -107,6 +107,11 @@ public class CreateTransactionDto
     public decimal Amount { get; set; }
 
     /// <summary>
+    /// Currency of the transaction.
+    /// </summary>
+    public Currency Currency { get; set; } = Currency.USD;
+
+    /// <summary>
     /// Date of the transaction.
     /// </summary>
     [Required]
@@ -135,6 +140,11 @@ public class UpdateTransactionDto
     /// </summary>
     [Range(0.01, double.MaxValue)]
     public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// Currency of the transaction.
+    /// </summary>
+    public Currency? Currency { get; set; }
 
     /// <summary>
     /// Date of the transaction.
@@ -167,6 +177,11 @@ public class TransactionDto
     /// Amount of the transaction.
     /// </summary>
     public decimal Amount { get; set; }
+
+    /// <summary>
+    /// Currency of the transaction.
+    /// </summary>
+    public Currency Currency { get; set; }
 
     /// <summary>
     /// Date of the transaction.

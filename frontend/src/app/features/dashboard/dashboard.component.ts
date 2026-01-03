@@ -213,8 +213,8 @@ import { DashboardStats, TimeDistribution, MonthlyFlow } from '../../core/models
           <a routerLink="/finance">
             <p-button label="Add Transaction" icon="pi pi-dollar" severity="success"></p-button>
           </a>
-          <a routerLink="/time-tracking/projects">
-            <p-button label="Manage Projects" icon="pi pi-folder" severity="info"></p-button>
+          <a routerLink="/settings">
+            <p-button label="Manage Settings" icon="pi pi-cog" severity="info"></p-button>
           </a>
         </div>
       }
