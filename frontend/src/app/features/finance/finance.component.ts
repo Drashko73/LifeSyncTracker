@@ -65,8 +65,8 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
         <p-card styleClass="hover-card">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-gray-500 text-sm">Total Income (Last 12 Months)</p>
-              <p class="text-2xl font-bold text-green-600">\${{ summary()?.totalIncome?.toFixed(2) || '0.00' }}</p>
+              <p class="text-gray-500 text-sm">Total Income</p>
+              <p class="text-2xl font-bold text-green-600">\{{ formatCurrency(summary()?.totalIncome || 0, userPreferencesService.getCurrency()) }}</p>
             </div>
             <div class="p-3 rounded-full bg-green-100">
               <i class="pi pi-arrow-up text-2xl text-green-600"></i>
@@ -78,7 +78,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
           <div class="flex items-center justify-between">
             <div>
               <p class="text-gray-500 text-sm">Total Expenses</p>
-              <p class="text-2xl font-bold text-red-600">\${{ summary()?.totalExpenses?.toFixed(2) || '0.00' }}</p>
+              <p class="text-2xl font-bold text-red-600">\{{ formatCurrency(summary()?.totalExpenses || 0, userPreferencesService.getCurrency()) }}</p>
             </div>
             <div class="p-3 rounded-full bg-red-100">
               <i class="pi pi-arrow-down text-2xl text-red-600"></i>
@@ -91,7 +91,7 @@ import { Transaction, TransactionCategory, TransactionType, Currency, Transactio
             <div>
               <p class="text-gray-500 text-sm">Net Balance</p>
               <p class="text-2xl font-bold" [class]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600' : 'text-red-600'">
-                \${{ summary()?.netBalance?.toFixed(2) || '0.00' }}
+                \{{ formatCurrency(summary()?.netBalance || 0, userPreferencesService.getCurrency()) }}
               </p>
             </div>
             <div class="p-3 rounded-full" [class]="(summary()?.netBalance || 0) >= 0 ? 'bg-green-100' : 'bg-red-100'">
@@ -434,7 +434,11 @@ export class FinanceComponent implements OnInit {
     const startDate = this.filterStartDate || new Date(new Date().getFullYear(), new Date().getMonth()-12, 1);
     const endDate = this.filterEndDate || new Date();
 
-    this.transactionService.getSummary(startDate, endDate).subscribe({
+    // Adjust endDate to include the entire day
+    const newEndDate = new Date(endDate);
+    newEndDate.setDate(newEndDate.getDate() + 1);
+
+    this.transactionService.getSummary(startDate, newEndDate).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.summary.set(response.data);

@@ -9,7 +9,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { TimeEntryService } from '../../core/services/time-entry.service';
-import { DashboardStats, TimeDistribution, MonthlyFlow } from '../../core/models';
+import { UserPreferencesService } from '../../core/services/user-preferences.service';
+import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../core/models';
 
 /**
  * Dashboard component showing overview statistics and charts.
@@ -78,7 +79,7 @@ import { DashboardStats, TimeDistribution, MonthlyFlow } from '../../core/models
               </div>
               <div>
                 <p class="text-gray-500 text-sm">Monthly Income</p>
-                <p class="text-2xl font-bold text-emerald-600">\${{ stats()?.monthlyIncome?.toFixed(2) || '0.00' }}</p>
+                <p class="text-2xl font-bold text-emerald-600">\{{ formatCurrency(stats()?.monthlyIncome || 0, userPreferencesService.getCurrency()) }}</p>
               </div>
             </div>
           </p-card>
@@ -91,7 +92,7 @@ import { DashboardStats, TimeDistribution, MonthlyFlow } from '../../core/models
               </div>
               <div>
                 <p class="text-gray-500 text-sm">Monthly Expenses</p>
-                <p class="text-2xl font-bold text-red-600">\${{ stats()?.monthlyExpenses?.toFixed(2) || '0.00' }}</p>
+                <p class="text-2xl font-bold text-red-600">\{{ formatCurrency(stats()?.monthlyExpenses || 0, userPreferencesService.getCurrency()) }}</p>
               </div>
             </div>
           </p-card>
@@ -225,6 +226,7 @@ export class DashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
   protected timeEntryService = inject(TimeEntryService);
   private messageService = inject(MessageService);
+  protected userPreferencesService = inject(UserPreferencesService);
 
   isLoading = signal(true);
   stats = signal<DashboardStats | null>(null);
@@ -343,4 +345,18 @@ export class DashboardComponent implements OnInit {
   formatDate(date: Date): string {
     return new Date(date).toLocaleDateString();
   }
+
+  formatCurrency(amount: number, currency?: Currency): string {
+      const currencyCode = currency ?? Currency.USD;
+      switch (currencyCode) {
+        case Currency.USD:
+          return `$${amount.toFixed(2)}`;
+        case Currency.EUR:
+          return `€${amount.toFixed(2)}`;
+        case Currency.RSD:
+          return `${amount.toFixed(2)} дин.`;
+        default:
+          return `$${amount.toFixed(2)}`;
+      }
+    }
 }

@@ -239,4 +239,11 @@ export class UserPreferencesService {
 
     return { startDate, endDate };
   }
+
+  /**
+   * Gets the current currency preference.
+   */
+  getCurrency(): Currency {
+    return this.currency();
+  }
 }
