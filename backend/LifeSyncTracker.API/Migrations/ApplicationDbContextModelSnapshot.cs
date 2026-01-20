@@ -4,6 +4,7 @@ using LifeSyncTracker.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -15,44 +16,50 @@ namespace LifeSyncTracker.API.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("LifeSyncTracker.API.Models.Entities.Project", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("AutoCreateIncome")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("ColorCode")
                         .HasMaxLength(20)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<decimal?>("HourlyRate")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -65,22 +72,24 @@ namespace LifeSyncTracker.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
                         .HasMaxLength(20)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -94,39 +103,41 @@ namespace LifeSyncTracker.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(4000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(4000)");
 
                     b.Property<int?>("DurationMinutes")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("EndTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsRunning")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("NextSteps")
                         .HasMaxLength(4000)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(4000)");
 
                     b.Property<int?>("ProjectId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("StartTime")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -143,38 +154,40 @@ namespace LifeSyncTracker.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("CategoryId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Currency")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<bool>("IsAutoGenerated")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("LinkedTimeEntryId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -194,32 +207,34 @@ namespace LifeSyncTracker.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ColorCode")
                         .HasMaxLength(20)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Icon")
                         .HasMaxLength(50)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<bool>("IsSystem")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int?>("UserId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -232,7 +247,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 1,
                             ColorCode = "#22C55E",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5656),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7229),
                             Icon = "pi-dollar",
                             IsSystem = true,
                             Name = "Salary",
@@ -242,7 +257,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 2,
                             ColorCode = "#3B82F6",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5667),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7247),
                             Icon = "pi-briefcase",
                             IsSystem = true,
                             Name = "Freelance",
@@ -252,7 +267,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 3,
                             ColorCode = "#8B5CF6",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5669),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7250),
                             Icon = "pi-chart-line",
                             IsSystem = true,
                             Name = "Investment",
@@ -262,7 +277,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 4,
                             ColorCode = "#10B981",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5671),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7253),
                             Icon = "pi-plus",
                             IsSystem = true,
                             Name = "Other Income",
@@ -272,7 +287,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 5,
                             ColorCode = "#F59E0B",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5672),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7256),
                             Icon = "pi-shopping-cart",
                             IsSystem = true,
                             Name = "Groceries",
@@ -282,7 +297,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 6,
                             ColorCode = "#EF4444",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5673),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7259),
                             Icon = "pi-home",
                             IsSystem = true,
                             Name = "Rent",
@@ -292,7 +307,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 7,
                             ColorCode = "#F97316",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5675),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7261),
                             Icon = "pi-bolt",
                             IsSystem = true,
                             Name = "Utilities",
@@ -302,7 +317,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 8,
                             ColorCode = "#6366F1",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5676),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7264),
                             Icon = "pi-car",
                             IsSystem = true,
                             Name = "Transportation",
@@ -312,7 +327,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 9,
                             ColorCode = "#EC4899",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5677),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7267),
                             Icon = "pi-desktop",
                             IsSystem = true,
                             Name = "Software Subscription",
@@ -322,7 +337,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 10,
                             ColorCode = "#14B8A6",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5678),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7269),
                             Icon = "pi-ticket",
                             IsSystem = true,
                             Name = "Entertainment",
@@ -332,7 +347,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 11,
                             ColorCode = "#F43F5E",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5680),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7271),
                             Icon = "pi-heart",
                             IsSystem = true,
                             Name = "Healthcare",
@@ -342,7 +357,7 @@ namespace LifeSyncTracker.API.Migrations
                         {
                             Id = 12,
                             ColorCode = "#64748B",
-                            CreatedAt = new DateTime(2026, 1, 3, 13, 9, 44, 258, DateTimeKind.Utc).AddTicks(5681),
+                            CreatedAt = new DateTime(2026, 1, 20, 0, 25, 29, 853, DateTimeKind.Utc).AddTicks(7274),
                             Icon = "pi-minus",
                             IsSystem = true,
                             Name = "Other Expense",
@@ -354,27 +369,29 @@ namespace LifeSyncTracker.API.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(255)");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -390,10 +407,10 @@ namespace LifeSyncTracker.API.Migrations
             modelBuilder.Entity("TimeEntryTag", b =>
                 {
                     b.Property<int>("TagId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.Property<int>("TimeEntryId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("integer");
 
                     b.HasKey("TagId", "TimeEntryId");
 

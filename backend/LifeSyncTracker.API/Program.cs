@@ -11,19 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 
-// Configure Database based on environment
-if (builder.Environment.IsDevelopment())
-{
-    // Use SQLite for development
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("SqliteConnection")));
-}
-else
-{
-    // Use PostgreSQL for production
-    builder.Services.AddDbContext<ApplicationDbContext>(options =>
-        options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
-}
+// Configure Database - Always use PostgreSQL to ensure consistent migrations
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
