@@ -1,4 +1,5 @@
 using LifeSyncTracker.API.Models.DTOs;
+using LifeSyncTracker.API.Models.DTOs.Common.Response;
 
 namespace LifeSyncTracker.API.Services.Interfaces;
 

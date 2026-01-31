@@ -3,6 +3,7 @@ using LifeSyncTracker.API.Data;
 using LifeSyncTracker.API.Models.DTOs;
 using LifeSyncTracker.API.Models.Entities;
 using LifeSyncTracker.API.Services.Interfaces;
+using LifeSyncTracker.API.Models.DTOs.Common.Response;
 
 namespace LifeSyncTracker.API.Services;
 
