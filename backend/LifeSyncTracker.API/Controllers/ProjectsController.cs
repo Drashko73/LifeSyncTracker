@@ -1,9 +1,10 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using LifeSyncTracker.API.Models.DTOs;
 using LifeSyncTracker.API.Services.Interfaces;
 using LifeSyncTracker.API.Models.DTOs.Common.Response;
+using LifeSyncTracker.API.Models.DTOs.Project.Response;
+using LifeSyncTracker.API.Models.DTOs.Project.Request;
 
 namespace LifeSyncTracker.API.Controllers;
 

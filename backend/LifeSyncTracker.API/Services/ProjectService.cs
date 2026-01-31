@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using LifeSyncTracker.API.Data;
-using LifeSyncTracker.API.Models.DTOs;
 using LifeSyncTracker.API.Models.Entities;
 using LifeSyncTracker.API.Services.Interfaces;
+using LifeSyncTracker.API.Models.DTOs.Project.Response;
+using LifeSyncTracker.API.Models.DTOs.Project.Request;
 
 namespace LifeSyncTracker.API.Services;
 
