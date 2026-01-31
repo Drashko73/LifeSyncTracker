@@ -170,6 +170,10 @@ public class TimeEntryService : ITimeEntryService
     /// <inheritdoc />
     public async Task<TimeEntryDto> CreateManualEntryAsync(int userId, CreateTimeEntryDto dto)
     {
+        // Convert times to UTC for consistency
+        dto.StartTime = dto.StartTime.ToUniversalTime();
+        dto.EndTime = dto.EndTime.ToUniversalTime();
+
         // Validate times
         if (dto.EndTime <= dto.StartTime)
         {
