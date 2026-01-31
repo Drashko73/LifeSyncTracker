@@ -1,4 +1,5 @@
-using LifeSyncTracker.API.Models.DTOs;
+using LifeSyncTracker.API.Models.DTOs.Auth.Request;
+using LifeSyncTracker.API.Models.DTOs.Auth.Response;
 
 namespace LifeSyncTracker.API.Services.Interfaces;
 

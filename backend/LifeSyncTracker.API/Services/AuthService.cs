@@ -4,9 +4,10 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using LifeSyncTracker.API.Data;
-using LifeSyncTracker.API.Models.DTOs;
 using LifeSyncTracker.API.Models.Entities;
 using LifeSyncTracker.API.Services.Interfaces;
+using LifeSyncTracker.API.Models.DTOs.Auth.Response;
+using LifeSyncTracker.API.Models.DTOs.Auth.Request;
 
 namespace LifeSyncTracker.API.Services;
 
