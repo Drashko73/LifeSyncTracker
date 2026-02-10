@@ -404,7 +404,7 @@ import {
                   <tr>
                     <td>
                       <span class="flex items-center">
-                        <i [class]="category.icon + ' mr-2'" *ngIf="category.icon"></i>
+                        <i [class]="'pi ' + category.icon + ' mr-2'" *ngIf="category.icon"></i>
                         {{ category.name }}
                       </span>
                     </td>
