@@ -419,6 +419,7 @@
     [modal]="true"
     [style]="{ width: '450px' }"
     [closable]="true"
+    [maximizable]="true"
     >
     <form [formGroup]="projectForm">
         <div class="mb-4">
@@ -449,11 +450,8 @@
         ></p-inputnumber>
         </div>
         <div class="mb-4">
-        <p-checkbox
-            formControlName="autoCreateIncome"
-            [binary]="true"
-            label="Auto-create income transactions"
-        ></p-checkbox>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Auto-create Income Transactions</label>
+        <p-checkbox formControlName="autoCreateIncome" [binary]="true"></p-checkbox>
         </div>
         @if (editingProject) {
         <div class="mb-4">
@@ -484,6 +482,7 @@
     [modal]="true"
     [style]="{ width: '400px' }"
     [closable]="true"
+    [maximizable]="true"
     >
     <form [formGroup]="tagForm">
         <div class="mb-4">
@@ -518,6 +517,7 @@
     [modal]="true"
     [style]="{ width: '400px' }"
     [closable]="true"
+    [maximizable]="true"
     >
     <form [formGroup]="categoryForm">
         <div class="mb-4">
