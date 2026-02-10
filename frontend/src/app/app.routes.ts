@@ -15,12 +15,12 @@ export const routes: Routes = [
     children: [
       {
         path: 'login',
-        loadComponent: () => import('./features/auth/login.component').then(m => m.LoginComponent),
+        loadComponent: () => import('./features/auth/login/login.component').then(m => m.LoginComponent),
         canActivate: [noAuthGuard]
       },
       {
         path: 'register',
-        loadComponent: () => import('./features/auth/register.component').then(m => m.RegisterComponent),
+        loadComponent: () => import('./features/auth/register/register.component').then(m => m.RegisterComponent),
         canActivate: [noAuthGuard]
       }
     ]

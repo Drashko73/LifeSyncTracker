@@ -1,0 +1,64 @@
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 px-4 transition-colors">
+    <p-toast></p-toast>
+    <p-card class="w-full max-w-md">
+    <ng-template pTemplate="header">
+        <div class="text-center pt-6">
+        <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Welcome Back</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-2">Sign in to your LifeSync Tracker account</p>
+        </div>
+    </ng-template>
+    
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="p-4">
+        <div class="mb-4">
+        <label for="usernameOrEmail" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Username or Email
+        </label>
+        <input 
+            pInputText 
+            id="usernameOrEmail" 
+            formControlName="usernameOrEmail"
+            class="w-full"
+            placeholder="Enter your username or email"
+        />
+        @if (loginForm.get('usernameOrEmail')?.invalid && loginForm.get('usernameOrEmail')?.touched) {
+            <small class="text-red-500">Username or email is required</small>
+        }
+        </div>
+
+        <div class="mb-6">
+        <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Password
+        </label>
+        <p-password 
+            id="password" 
+            formControlName="password"
+            [feedback]="false"
+            [toggleMask]="true"
+            styleClass="w-full"
+            inputStyleClass="w-full"
+            placeholder="Enter your password"
+        ></p-password>
+        @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <small class="text-red-500">Password is required</small>
+        }
+        </div>
+
+        <p-button 
+        type="submit" 
+        label="Sign In" 
+        styleClass="w-full"
+        [loading]="isLoading"
+        [disabled]="loginForm.invalid || isLoading"
+        ></p-button>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="text-center pb-4">
+        <p class="text-gray-500 dark:text-gray-400">
+            Don't have an account? 
+            <a routerLink="/auth/register" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Sign up</a>
+        </p>
+        </div>
+    </ng-template>
+    </p-card>
+</div>
