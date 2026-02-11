@@ -21,7 +21,7 @@ public interface ITransactionService
     /// <param name="userId">User ID.</param>
     /// <param name="dto">Category data.</param>
     /// <returns>Created category.</returns>
-    Task<TransactionCategoryDto> CreateCategoryAsync(int userId, CreateTransactionCategoryDto dto);
+    Task<TransactionCategoryDto?> CreateCategoryAsync(int userId, CreateTransactionCategoryDto dto);
 
     /// <summary>
     /// Updates a custom transaction category.

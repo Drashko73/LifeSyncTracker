@@ -52,6 +52,10 @@ public class TransactionsController : ControllerBase
     {
         var userId = GetUserId();
         var category = await _transactionService.CreateCategoryAsync(userId, dto);
+        if (category == null)
+        {
+            return BadRequest(ApiResponse<TransactionCategoryDto>.ErrorResponse("Failed to create category. Category with name {" + dto.Name + "} already exists."));
+        }
         return CreatedAtAction(nameof(GetCategories), ApiResponse<TransactionCategoryDto>.SuccessResponse(category, "Category created successfully."));
     }
 

@@ -35,8 +35,17 @@ public class TransactionService : ITransactionService
     }
 
     /// <inheritdoc />
-    public async Task<TransactionCategoryDto> CreateCategoryAsync(int userId, CreateTransactionCategoryDto dto)
+    public async Task<TransactionCategoryDto?> CreateCategoryAsync(int userId, CreateTransactionCategoryDto dto)
     {
+        // Check for duplicate category name for this user
+        var exists = await _context.TransactionCategories
+            .FirstOrDefaultAsync(c => (c.UserId == userId || c.IsSystem) && c.Name == dto.Name);
+
+        if (exists is not null)
+        {
+            return null;
+        }
+
         var category = new TransactionCategory
         {
             Name = dto.Name,
