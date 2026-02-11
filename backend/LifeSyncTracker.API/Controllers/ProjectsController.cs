@@ -1,10 +1,11 @@
-using System.Security.Claims;
+using LifeSyncTracker.API.Models.DTOs;
+using LifeSyncTracker.API.Models.DTOs.Common.Response;
+using LifeSyncTracker.API.Models.DTOs.Project.Request;
+using LifeSyncTracker.API.Models.DTOs.Project.Response;
+using LifeSyncTracker.API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using LifeSyncTracker.API.Services.Interfaces;
-using LifeSyncTracker.API.Models.DTOs.Common.Response;
-using LifeSyncTracker.API.Models.DTOs.Project.Response;
-using LifeSyncTracker.API.Models.DTOs.Project.Request;
+using System.Security.Claims;
 
 namespace LifeSyncTracker.API.Controllers;
 
@@ -71,9 +72,16 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<ProjectDto>), StatusCodes.Status201Created)]
     public async Task<ActionResult<ApiResponse<ProjectDto>>> Create([FromBody] CreateProjectDto dto)
     {
-        var userId = GetUserId();
-        var project = await _projectService.CreateAsync(userId, dto);
-        return CreatedAtAction(nameof(GetById), new { id = project.Id }, ApiResponse<ProjectDto>.SuccessResponse(project, "Project created successfully."));
+        try
+        {
+            var userId = GetUserId();
+            var project = await _projectService.CreateAsync(userId, dto);
+            return CreatedAtAction(nameof(GetById), new { id = project.Id }, ApiResponse<ProjectDto>.SuccessResponse(project, "Project created successfully."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<TagDto>.ErrorResponse(ex.Message));
+        }
     }
 
     /// <summary>

@@ -69,6 +69,14 @@ public class ProjectService : IProjectService
     /// <inheritdoc />
     public async Task<ProjectDto> CreateAsync(int userId, CreateProjectDto dto)
     {
+        // Check if there is already a project with given name for this user
+        var exists = await _context.Projects.AnyAsync(project => project.Name.ToLower().Equals(dto.Name.ToLower()) && project.UserId == userId);
+
+        if (exists)
+        {
+            throw new InvalidOperationException("Failed to create a project. Project with the same name already exists.");
+        }
+
         var project = new Project
         {
             Name = dto.Name,

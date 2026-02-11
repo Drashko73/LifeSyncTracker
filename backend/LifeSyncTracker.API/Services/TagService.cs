@@ -46,7 +46,7 @@ public class TagService : ITagService
     {
         // Check if tag with same name already exists for user
         var exists = await _context.Tags
-            .AnyAsync(t => t.UserId == userId && t.Name == dto.Name);
+            .AnyAsync(t => t.UserId == userId && t.Name.ToLower().Equals(dto.Name.ToLower()));
 
         if (exists)
         {

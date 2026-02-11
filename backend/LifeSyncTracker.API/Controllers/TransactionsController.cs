@@ -50,13 +50,16 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<TransactionCategoryDto>), StatusCodes.Status201Created)]
     public async Task<ActionResult<ApiResponse<TransactionCategoryDto>>> CreateCategory([FromBody] CreateTransactionCategoryDto dto)
     {
-        var userId = GetUserId();
-        var category = await _transactionService.CreateCategoryAsync(userId, dto);
-        if (category == null)
+        try
         {
-            return BadRequest(ApiResponse<TransactionCategoryDto>.ErrorResponse("Failed to create category. Category with name {" + dto.Name + "} already exists."));
+            var userId = GetUserId();
+            var category = await _transactionService.CreateCategoryAsync(userId, dto);
+            return CreatedAtAction(nameof(GetCategories), ApiResponse<TransactionCategoryDto>.SuccessResponse(category, "Category created successfully."));
         }
-        return CreatedAtAction(nameof(GetCategories), ApiResponse<TransactionCategoryDto>.SuccessResponse(category, "Category created successfully."));
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<TagDto>.ErrorResponse(ex.Message));
+        }
     }
 
     /// <summary>
