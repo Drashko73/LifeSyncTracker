@@ -168,6 +168,9 @@ public class TransactionService : ITransactionService
             throw new InvalidOperationException("Invalid category.");
         }
 
+        // Convert times to UTC to ensure consistency
+        dto.Date = dto.Date.ToUniversalTime();
+
         var transaction = new Transaction
         {
             Amount = dto.Amount,
