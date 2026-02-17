@@ -562,14 +562,14 @@ public class TimeEntryService : ITimeEntryService
     private static double RoundToHalfHour(int totalMinutes)
     {
         if (totalMinutes == 0) return 0;
-        if (totalMinutes < 30) return 0.5;
+        if (totalMinutes <= 30) return 0.5;
 
         var hours = totalMinutes / 60;
         var remainingMinutes = totalMinutes % 60;
 
         if (remainingMinutes == 0)
             return hours;
-        else if (remainingMinutes < 30)
+        else if (remainingMinutes <= 30)
             return hours + 0.5;
         else
             return hours + 1.0;
