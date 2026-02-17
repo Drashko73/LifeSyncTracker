@@ -81,4 +81,14 @@ public interface ITimeEntryService
     /// <param name="month">Month (1-12).</param>
     /// <returns>Employer report.</returns>
     Task<EmployerReportDto?> GetEmployerReportAsync(int userId, int projectId, int year, int month);
+
+    /// <summary>
+    /// Generates a PDF report for a project and time period.
+    /// </summary>
+    /// <param name="userId">User ID.</param>
+    /// <param name="projectId">Project ID.</param>
+    /// <param name="year">Year.</param>
+    /// <param name="month">Month (1-12).</param>
+    /// <returns>PDF file as byte array.</returns>
+    Task<byte[]?> GetEmployerReportPdfAsync(int userId, int projectId, int year, int month);
 }

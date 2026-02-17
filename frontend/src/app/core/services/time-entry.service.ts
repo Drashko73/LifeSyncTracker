@@ -202,4 +202,19 @@ export class TimeEntryService {
     
     return this.http.get<ApiResponse<EmployerReport>>(`${this.apiUrl}/report`, { params });
   }
+
+  /**
+   * Downloads a PDF report for a project and month.
+   */
+  downloadPdfReport(projectId: number, year: number, month: number): Observable<Blob> {
+    const params = new HttpParams()
+      .set('projectId', projectId.toString())
+      .set('year', year.toString())
+      .set('month', month.toString());
+
+    return this.http.get(`${this.apiUrl}/report/pdf`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 }

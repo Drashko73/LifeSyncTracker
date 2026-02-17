@@ -214,6 +214,27 @@ public class TimeEntriesController : ControllerBase
     }
 
     /// <summary>
+    /// Gets a PDF report for a project and month.
+    /// </summary>
+    /// <param name="projectId">Project ID.</param>"
+    /// <param name="year">Year.</param>"
+    /// <param name="month">Month (1-12).</param>"
+    /// <returns>PDF file.</returns>
+    [HttpGet("report/pdf")]
+    [ProducesResponseType(typeof(FileContentResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> GetEmployerReportPdf([FromQuery] int projectId, [FromQuery] int year, [FromQuery] int month)
+    {
+        var userId = GetUserId();
+        var pdfData = await _timeEntryService.GetEmployerReportPdfAsync(userId, projectId, year, month);
+        if (pdfData == null)
+        {
+            return NotFound(ApiResponse<string>.ErrorResponse("Project not found."));
+        }
+        return File(pdfData, "application/pdf", $"EmployerReport_{projectId}_{year}_{month}.pdf");
+    }
+
+    /// <summary>
     /// Gets the user ID from the JWT token claims.
     /// </summary>
     /// <returns>User ID.</returns>

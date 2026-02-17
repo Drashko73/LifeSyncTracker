@@ -111,8 +111,16 @@
     <!-- Time Entries Table -->
     <p-card>
     <ng-template pTemplate="header">
-        <div class="p-4 border-b dark:border-gray-700">
+        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
         <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Time Entries</h2>
+        <p-button
+            label="PDF Report"
+            icon="pi pi-file-pdf"
+            severity="help"
+            [outlined]="true"
+            size="small"
+            (onClick)="showPdfReportDialog()"
+        ></p-button>
         </div>
     </ng-template>
     
@@ -319,6 +327,63 @@
     <ng-template pTemplate="footer">
         <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="showManualDialog = false"></p-button>
         <p-button [label]="editingEntry ? 'Update' : 'Save'" icon="pi pi-check" (onClick)="saveManualEntry()"></p-button>
+    </ng-template>
+    </p-dialog>
+
+    <!-- PDF Report Dialog -->
+    <p-dialog
+    header="Generate PDF Report"
+    [(visible)]="showPdfDialog"
+    [modal]="true"
+    [style]="{width: '400px', height: 'auto'}"
+    [closable]="true"
+    [maximizable]="true"
+    >
+    <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
+        <p-select
+        [options]="projects()"
+        [(ngModel)]="pdfProjectId"
+        optionLabel="name"
+        optionValue="id"
+        placeholder="Select a project"
+        appendTo="body"
+        styleClass="w-full"
+        ></p-select>
+    </div>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year</label>
+        <p-select
+            [options]="pdfYearOptions"
+            [(ngModel)]="pdfYear"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="w-full"
+        ></p-select>
+        </div>
+        <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month</label>
+        <p-select
+            [options]="pdfMonthOptions"
+            [(ngModel)]="pdfMonth"
+            optionLabel="label"
+            optionValue="value"
+            appendTo="body"
+            styleClass="w-full"
+        ></p-select>
+        </div>
+    </div>
+    <ng-template pTemplate="footer">
+        <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="showPdfDialog = false"></p-button>
+        <p-button
+        label="Download"
+        icon="pi pi-download"
+        (onClick)="downloadPdfReport()"
+        [disabled]="!pdfProjectId"
+        [loading]="isDownloadingPdf"
+        ></p-button>
     </ng-template>
     </p-dialog>
 </div>

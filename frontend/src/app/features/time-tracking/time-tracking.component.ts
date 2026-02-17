@@ -62,7 +62,34 @@ export class TimeTrackingComponent implements OnInit {
 
   showStopDialog = false;
   showManualDialog = false;
+  showPdfDialog = false;
   editingEntry: TimeEntry | null = null;
+
+  // PDF report fields
+  pdfProjectId: number | null = null;
+  pdfYear: number = new Date().getFullYear();
+  pdfMonth: number = new Date().getMonth() + 1;
+  isDownloadingPdf = false;
+
+  pdfYearOptions = Array.from({ length: 6 }, (_, i) => {
+    const y = new Date().getFullYear() - i;
+    return { label: y.toString(), value: y };
+  });
+
+  pdfMonthOptions = [
+    { label: 'January', value: 1 },
+    { label: 'February', value: 2 },
+    { label: 'March', value: 3 },
+    { label: 'April', value: 4 },
+    { label: 'May', value: 5 },
+    { label: 'June', value: 6 },
+    { label: 'July', value: 7 },
+    { label: 'August', value: 8 },
+    { label: 'September', value: 9 },
+    { label: 'October', value: 10 },
+    { label: 'November', value: 11 },
+    { label: 'December', value: 12 }
+  ];
 
   filterPeriod: number = 6;
   filterProjectId: number | null = null;
@@ -378,6 +405,44 @@ export class TimeTrackingComponent implements OnInit {
     const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
+  }
+
+  showPdfReportDialog(): void {
+    this.pdfProjectId = null;
+    this.pdfYear = new Date().getFullYear();
+    this.pdfMonth = new Date().getMonth() + 1;
+    this.showPdfDialog = true;
+  }
+
+  downloadPdfReport(): void {
+    if (!this.pdfProjectId) return;
+    this.isDownloadingPdf = true;
+
+    this.timeEntryService.downloadPdfReport(this.pdfProjectId, this.pdfYear, this.pdfMonth).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `report_${this.pdfYear}_${this.pdfMonth}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.isDownloadingPdf = false;
+        this.showPdfDialog = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'PDF report downloaded'
+        });
+      },
+      error: () => {
+        this.isDownloadingPdf = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to download PDF report'
+        });
+      }
+    });
   }
 
   pageChange(event: any): void {
