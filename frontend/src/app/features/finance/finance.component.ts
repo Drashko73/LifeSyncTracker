@@ -137,7 +137,6 @@ export class FinanceComponent implements OnInit {
 
     this.transactionService.getAll(filter).subscribe({
       next: (response) => {
-        console.log(response);
         if (response.success && response.data) {
           this.transactions.set(response.data.items);
           this.totalRecords = response.data.totalCount;
