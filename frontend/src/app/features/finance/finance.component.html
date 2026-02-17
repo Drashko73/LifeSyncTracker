@@ -69,6 +69,7 @@
             optionLabel="label" 
             optionValue="value"
             styleClass="w-full"
+            appendTo="body"
             (onChange)="onFilterPeriodChange()"
         ></p-select>
         </div>
@@ -82,6 +83,7 @@
             placeholder="All Types"
             [showClear]="true"
             styleClass="w-full"
+            appendTo="body"
             (onChange)="loadTransactions()"
         ></p-select>
         </div>
@@ -95,6 +97,7 @@
             placeholder="All Categories"
             [showClear]="true"
             styleClass="w-full"
+            appendTo="body"
             (onChange)="loadTransactions()"
         ></p-select>
         </div>
@@ -104,6 +107,8 @@
             [(ngModel)]="filterStartDate" 
             dateFormat="yy-mm-dd"
             [showIcon]="true"
+            appendTo="body"
+            [touchUI]="isMobile"
             styleClass="w-full"
             (onSelect)="loadTransactions()"
         ></p-datepicker>
@@ -114,6 +119,8 @@
             [(ngModel)]="filterEndDate" 
             dateFormat="yy-mm-dd"
             [showIcon]="true"
+            appendTo="body"
+            [touchUI]="isMobile"
             styleClass="w-full"
             (onSelect)="loadTransactions()"
         ></p-datepicker>
@@ -220,6 +227,7 @@
             optionLabel="name" 
             optionValue="id"
             placeholder="Select a category"
+            appendTo="body"
             class="w-full"
         >
             <ng-template let-category pTemplate="item">
@@ -252,6 +260,7 @@
             optionLabel="label" 
             optionValue="value"
             styleClass="w-full"
+            appendTo="body"
             ></p-select>
         </div>
         </div>
@@ -261,6 +270,8 @@
             formControlName="date" 
             dateFormat="yy-mm-dd"
             [showIcon]="true"
+            appendTo="body"
+            [touchUI]="isMobile"
             styleClass="w-full"
         ></p-datepicker>
         </div>

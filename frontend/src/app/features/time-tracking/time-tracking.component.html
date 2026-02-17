@@ -65,6 +65,7 @@
             [(ngModel)]="filterPeriod" 
             optionLabel="label" 
             optionValue="value"
+            appendTo="body"
             styleClass="w-full"
             (onChange)="onFilterPeriodChange()"
         ></p-select>
@@ -78,6 +79,7 @@
             optionValue="id"
             placeholder="All Projects"
             [showClear]="true"
+            appendTo="body"
             styleClass="w-full"
             (onChange)="loadTimeEntries()"
         ></p-select>
@@ -88,6 +90,8 @@
             [(ngModel)]="filterStartDate" 
             dateFormat="yy-mm-dd"
             [showIcon]="true"
+            appendTo="body"
+            [touchUI]="isMobile"
             styleClass="w-full"
             (onSelect)="loadTimeEntries()"
         ></p-datepicker>
@@ -98,6 +102,8 @@
             [(ngModel)]="filterEndDate" 
             dateFormat="yy-mm-dd"
             [showIcon]="true"
+            appendTo="body"
+            [touchUI]="isMobile"
             styleClass="w-full"
             (onSelect)="loadTimeEntries()"
         ></p-datepicker>
@@ -193,7 +199,7 @@
     header="Stop Timer" 
     [(visible)]="showStopDialog" 
     [modal]="true" 
-    [style]="{width: '500px'}"
+    [style]="{width: '500px', 'max-width': '95vw'}"
     [closable]="true"
     [maximizable]="true"
     >
@@ -207,6 +213,7 @@
             optionValue="id"
             placeholder="Select a project"
             [showClear]="true"
+            appendTo="body"
             styleClass="w-full"
         ></p-select>
         </div>
@@ -253,7 +260,7 @@
     [header]="editingEntry ? 'Edit Time Entry' : 'Add Manual Entry'" 
     [(visible)]="showManualDialog" 
     [modal]="true" 
-    [style]="{width: '500px'}"
+    [style]="{width: '500px', 'max-width': '95vw'}"
     [closable]="true"
     [maximizable]="true"
     >
@@ -266,6 +273,8 @@
             [showTime]="true" 
             [showIcon]="true"
             dateFormat="yy-mm-dd"
+            appendTo="body"
+            [touchUI]="isMobile"
             styleClass="w-full"
             ></p-datepicker>
         </div>
@@ -276,6 +285,8 @@
             [showTime]="true" 
             [showIcon]="true"
             dateFormat="yy-mm-dd"
+            appendTo="body"
+            [touchUI]="isMobile"
             styleClass="w-full"
             ></p-datepicker>
         </div>
@@ -289,6 +300,7 @@
             optionValue="id"
             placeholder="Select a project"
             [showClear]="true"
+            appendTo="body"
             styleClass="w-full"
         ></p-select>
         </div>
@@ -335,7 +347,7 @@
     header="Generate PDF Report"
     [(visible)]="showPdfDialog"
     [modal]="true"
-    [style]="{width: '400px', height: 'auto'}"
+    [style]="{width: '400px', 'max-width': '95vw', height: 'auto'}"
     [closable]="true"
     [maximizable]="true"
     >

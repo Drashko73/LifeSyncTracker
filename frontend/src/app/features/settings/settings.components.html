@@ -46,6 +46,7 @@
                 (ngModelChange)="onThemeChange($event)"
                 optionLabel="label"
                 optionValue="value"
+                appendTo="body"
                 styleClass="w-full md:w-1/2"
                 >
                 <ng-template pTemplate="selectedItem" let-item>
@@ -75,6 +76,7 @@
                 (ngModelChange)="onCurrencyChange($event)"
                 optionLabel="label"
                 optionValue="value"
+                appendTo="body"
                 styleClass="w-full md:w-1/2"
                 ></p-select>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">This will be used as the default currency for new transactions</p>
@@ -91,6 +93,7 @@
                 optionValue="value"
                 [filter]="true"
                 filterPlaceholder="Search timezone..."
+                appendTo="body"
                 styleClass="w-full md:w-1/2"
                 ></p-select>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Used for displaying times in your local timezone</p>
@@ -105,6 +108,7 @@
                 (ngModelChange)="onFilterPeriodChange($event)"
                 optionLabel="label"
                 optionValue="value"
+                appendTo="body"
                 styleClass="w-full md:w-1/2"
                 ></p-select>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Default time period for filtering data in Time Tracking and Finance views</p>
@@ -539,6 +543,7 @@
             optionLabel="label"
             optionValue="value"
             placeholder="Select type"
+            appendTo="body"
             styleClass="w-full"
         ></p-select>
         </div>

@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, HostListener, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -64,6 +64,12 @@ export class TimeTrackingComponent implements OnInit {
   showManualDialog = false;
   showPdfDialog = false;
   editingEntry: TimeEntry | null = null;
+  isMobile = window.innerWidth < 768;
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.isMobile = window.innerWidth < 768;
+  }
 
   // PDF report fields
   pdfProjectId: number | null = null;
