@@ -382,9 +382,12 @@ export class TimeTrackingComponent implements OnInit {
 
   pageChange(event: any): void {
     const newPage = Math.floor(event.first / event.rows) + 1;
-    if (newPage === this.currentPage && event.rows === this.rows) return;
-    this.currentPage = newPage;
-    this.first = event.first;
+    const rowsChanged = event.rows !== this.rows;
+
+    if (!rowsChanged && newPage === this.currentPage && event.first === this.first) return;
+
+    this.currentPage = rowsChanged ? 1 : newPage;
+    this.first = rowsChanged ? 0 : event.first;
     this.rows = event.rows;
     this.loadTimeEntries();
   }
