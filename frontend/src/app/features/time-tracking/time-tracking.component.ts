@@ -69,6 +69,13 @@ export class TimeTrackingComponent implements OnInit {
   filterStartDate: Date | null = null;
   filterEndDate: Date | null = null;
 
+  totalRecords: number = 0;
+  currentPage: number = 1;
+  first: number = 0;
+  last: number = 0;
+  rows: number = 10;
+  showLoader: boolean = false;
+
   stopTimerForm = this.fb.group({
     projectId: [null as number | null],
     description: [''],
@@ -97,6 +104,8 @@ export class TimeTrackingComponent implements OnInit {
 
   onFilterPeriodChange(): void {
     this.applyFilterPeriod();
+    this.first = 0;
+    this.currentPage = 1;
     this.loadTimeEntries();
   }
 
@@ -132,15 +141,19 @@ export class TimeTrackingComponent implements OnInit {
       projectId: this.filterProjectId || undefined,
       startDate: this.filterStartDate || undefined,
       endDate: this.filterEndDate || undefined,
-      page: 1,
-      pageSize: 100
+      page: this.currentPage,
+      pageSize: this.rows
     };
 
+    this.showLoader = true;
     this.timeEntryService.getAll(filter).subscribe({
       next: (response) => {
         if (response.success && response.data) {
           this.timeEntries.set(response.data.items);
+          this.totalRecords = response.data.totalCount;
+          this.currentPage = response.data.page;
         }
+        this.showLoader = false;
         this.isLoading.set(false);
       },
       error: () => {
@@ -158,6 +171,8 @@ export class TimeTrackingComponent implements OnInit {
     this.filterPeriod = this.userPreferencesService.defaultFilterMonths();
     this.filterProjectId = null;
     this.applyFilterPeriod();
+    this.first = 0;
+    this.currentPage = 1;
     this.loadTimeEntries();
   }
 
@@ -366,5 +381,14 @@ export class TimeTrackingComponent implements OnInit {
     const b = parseInt(hex.substring(4, 6), 16);
     const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
+  }
+
+  pageChange(event: any): void {
+    const newPage = Math.floor(event.first / event.rows) + 1;
+    if (newPage === this.currentPage && event.rows === this.rows) return;
+    this.currentPage = newPage;
+    this.first = event.first;
+    this.rows = event.rows;
+    this.loadTimeEntries();
   }
 }

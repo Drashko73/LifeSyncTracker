@@ -124,8 +124,14 @@
         <p-table 
         [value]="timeEntries()" 
         [paginator]="true" 
-        [rows]="10"
+        [lazy]="true"
+        [first]="first"
+        (onLazyLoad)="pageChange($event)"
+        [rows]="rows"
+        [showLoader]="showLoader"
+        [rowsPerPageOptions]="[10, 25, 50]"
         [showCurrentPageReport]="true"
+        [totalRecords]="totalRecords"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         styleClass="p-datatable-sm"
         >
