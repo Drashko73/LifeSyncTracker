@@ -140,8 +140,13 @@
         <p-table 
         [value]="transactions()" 
         [paginator]="true" 
+        [lazy]="true"
+        [first]="first"
+        (onLazyLoad)="pageChange($event)"
         [rows]="10"
+        [rowsPerPageOptions]="[10, 25, 50]"
         [showCurrentPageReport]="true"
+        [totalRecords]="totalRecords"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} transactions"
         styleClass="p-datatable-sm"
         >
