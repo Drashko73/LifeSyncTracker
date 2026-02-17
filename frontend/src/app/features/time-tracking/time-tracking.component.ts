@@ -74,7 +74,6 @@ export class TimeTrackingComponent implements OnInit {
   first: number = 0;
   last: number = 0;
   rows: number = 10;
-  showLoader: boolean = false;
 
   stopTimerForm = this.fb.group({
     projectId: [null as number | null],
@@ -145,7 +144,6 @@ export class TimeTrackingComponent implements OnInit {
       pageSize: this.rows
     };
 
-    this.showLoader = true;
     this.timeEntryService.getAll(filter).subscribe({
       next: (response) => {
         if (response.success && response.data) {
@@ -153,7 +151,6 @@ export class TimeTrackingComponent implements OnInit {
           this.totalRecords = response.data.totalCount;
           this.currentPage = response.data.page;
         }
-        this.showLoader = false;
         this.isLoading.set(false);
       },
       error: () => {
