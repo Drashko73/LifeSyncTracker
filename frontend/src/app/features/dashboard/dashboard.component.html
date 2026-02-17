@@ -105,7 +105,10 @@
         </ng-template>
         <div class="p-4">
             @if (pieChartData()) {
-            <p-chart type="pie" [data]="pieChartData()" [options]="pieChartOptions"></p-chart>
+            <div class="flex flex-col items-center">
+                <p-chart type="pie" [data]="pieChartData()" [options]="pieChartOptions"></p-chart>
+                <p-button label="Download Chart" icon="pi pi-download" class="mt-6" (click)="downloadChart('pie')"></p-button>
+            </div>
             } @else {
             <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                 <i class="pi pi-chart-pie text-4xl mb-2"></i>
@@ -125,6 +128,9 @@
         <div class="p-4">
             @if (barChartData()) {
             <p-chart type="bar" [data]="barChartData()" [options]="barChartOptions"></p-chart>
+            <div class="flex flex-col items-center">
+                <p-button label="Download Chart" icon="pi pi-download" class="mt-6" (click)="downloadChart('bar')"></p-button>
+            </div>
             } @else {
             <div class="text-center py-8 text-gray-500 dark:text-gray-400">
                 <i class="pi pi-chart-bar text-4xl mb-2"></i>

@@ -167,4 +167,20 @@ export class DashboardComponent implements OnInit {
           return `$${amount.toFixed(2)}`;
       }
     }
+
+    downloadChart(type: 'pie' | 'bar'): void {
+        const chartElement = document.querySelector(`p-chart[type="${type}"] canvas`) as HTMLCanvasElement;
+        if (chartElement) {
+            const link = document.createElement('a');
+            link.href = chartElement.toDataURL('image/png');
+            link.download = `${type}-chart.png`;
+            link.click();
+        } else {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Chart not found for download'
+            });
+        }
+    }
 }
