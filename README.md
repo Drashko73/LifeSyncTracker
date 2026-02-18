@@ -2,6 +2,8 @@
 
 A unified web platform for freelancers and individuals to track time spent on specific tasks, manage personal finances (earnings vs. spendings), and visualize productivity and financial health.
 
+[<img src="./screenshots/dashboard.png" alt="Dashboard Screenshot" style="max-width:100%; height:auto;" title="LifeSync Tracker Dashboard">](./screenshots/dashboard.png)
+
 ## Features
 
 ### Time Tracking Module
@@ -174,4 +176,4 @@ export const environment = {
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the [MIT License](./LICENSE).
