@@ -48,6 +48,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<Transaction> Transactions { get; set; }
 
     /// <summary>
+    /// Refresh tokens table.
+    /// </summary>
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
+    /// <summary>
     /// Configures the model and relationships.
     /// </summary>
     /// <param name="modelBuilder">The model builder.</param>
@@ -135,6 +140,19 @@ public class ApplicationDbContext : DbContext
 
             entity.HasIndex(t => t.Date);
             entity.HasIndex(t => new { t.UserId, t.Date });
+        });
+
+        // RefreshToken configuration
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(rt => new { rt.UserId, rt.DeviceIdentifier });
+
+            entity.HasOne(rt => rt.User)
+                  .WithMany(u => u.RefreshTokens)
+                  .HasForeignKey(rt => rt.UserId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasIndex(rt => rt.Token).IsUnique();
         });
 
         // Seed default transaction categories

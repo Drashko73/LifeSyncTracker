@@ -17,6 +17,8 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
 
+    private const string DeviceIdHeaderName = "X-Device-Id";
+
     /// <summary>
     /// Initializes a new instance of the AuthController.
     /// </summary>
@@ -38,7 +40,8 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _authService.RegisterAsync(dto);
+            var deviceId = GetDeviceIdentifier();
+            var result = await _authService.RegisterAsync(dto, deviceId);
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Registration successful."));
         }
         catch (InvalidOperationException ex)
@@ -59,8 +62,39 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _authService.LoginAsync(dto);
+            var deviceId = GetDeviceIdentifier();
+            var result = await _authService.LoginAsync(dto, deviceId);
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Login successful."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<AuthResponseDto>.ErrorResponse(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ApiResponse<AuthResponseDto>.ErrorResponse(ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Refreshes access and refresh tokens using a valid refresh token.
+    /// </summary>
+    /// <param name="dto">The expired access token and current refresh token.</param>
+    /// <returns>Authentication response with new tokens.</returns>
+    [HttpPost("refresh")]
+    [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<AuthResponseDto>>> RefreshToken([FromBody] RefreshTokenRequestDto dto)
+    {
+        try
+        {
+            var deviceId = GetDeviceIdentifier();
+            var result = await _authService.RefreshTokenAsync(dto, deviceId);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Token refreshed successfully."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<AuthResponseDto>.ErrorResponse(ex.Message));
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -97,5 +131,20 @@ public class AuthController : ControllerBase
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
         return int.Parse(userIdClaim?.Value ?? "0");
+    }
+
+    /// <summary>
+    /// Gets the device identifier from the X-Device-Id request header.
+    /// </summary>
+    /// <returns>Device identifier string.</returns>
+    /// <exception cref="InvalidOperationException">Thrown when the header is missing or empty.</exception>
+    private string GetDeviceIdentifier()
+    {
+        if (!Request.Headers.TryGetValue(DeviceIdHeaderName, out var deviceId) || string.IsNullOrWhiteSpace(deviceId))
+        {
+            throw new InvalidOperationException($"The '{DeviceIdHeaderName}' header is required.");
+        }
+
+        return deviceId.ToString();
     }
 }

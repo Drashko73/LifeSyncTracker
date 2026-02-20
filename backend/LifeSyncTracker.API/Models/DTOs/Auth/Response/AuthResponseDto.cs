@@ -11,6 +11,11 @@
         public string Token { get; set; } = string.Empty;
 
         /// <summary>
+        /// Refresh token for obtaining new access tokens.
+        /// </summary>
+        public string RefreshToken { get; set; } = string.Empty;
+
+        /// <summary>
         /// Token expiration time.
         /// </summary>
         public DateTime ExpiresAt { get; set; }

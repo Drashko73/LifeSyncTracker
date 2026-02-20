@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,6 +19,8 @@ public class AuthService : IAuthService
 {
     private readonly ApplicationDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly int AccessTokenExpiryMinutes;
+    private readonly int RefreshTokenExpiryDays;
 
     /// <summary>
     /// Initializes a new instance of the AuthService.
@@ -28,10 +31,12 @@ public class AuthService : IAuthService
     {
         _context = context;
         _configuration = configuration;
+        AccessTokenExpiryMinutes = _configuration.GetValue("Jwt:AccessTokenExpiryMinutes", 15);
+        RefreshTokenExpiryDays = _configuration.GetValue("RefreshToken:ExpiryDays", 7);
     }
 
     /// <inheritdoc />
-    public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
+    public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto, string deviceIdentifier)
     {
         // Check if username already exists
         if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
@@ -57,12 +62,12 @@ public class AuthService : IAuthService
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
-        // Generate token and return response
-        return GenerateAuthResponse(user);
+        // Generate tokens and return response
+        return await GenerateAuthResponseAsync(user, deviceIdentifier);
     }
 
     /// <inheritdoc />
-    public async Task<AuthResponseDto> LoginAsync(LoginDto dto)
+    public async Task<AuthResponseDto> LoginAsync(LoginDto dto, string deviceIdentifier)
     {
         // Find user by username or email
         var user = await _context.Users
@@ -73,7 +78,37 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Invalid credentials.");
         }
 
-        return GenerateAuthResponse(user);
+        return await GenerateAuthResponseAsync(user, deviceIdentifier);
+    }
+
+    /// <inheritdoc />
+    public async Task<AuthResponseDto> RefreshTokenAsync(RefreshTokenRequestDto dto, string deviceIdentifier)
+    {
+        // Extract user principal from the expired access token
+        var principal = GetPrincipalFromExpiredToken(dto.AccessToken);
+        var userIdClaim = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (userIdClaim == null || !int.TryParse(userIdClaim, out var userId))
+        {
+            throw new UnauthorizedAccessException("Invalid access token.");
+        }
+
+        // Find the stored refresh token by composite key (userId + deviceIdentifier)
+        var storedToken = await _context.RefreshTokens
+            .FindAsync(userId, deviceIdentifier);
+
+        if (storedToken == null || storedToken.IsRevoked || storedToken.ExpiresAt <= DateTime.UtcNow
+            || storedToken.Token != dto.RefreshToken)
+        {
+            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+        }
+
+        // Find user
+        var user = await _context.Users.FindAsync(userId)
+            ?? throw new UnauthorizedAccessException("User not found.");
+
+        // Generate new tokens (replaces the existing row for this user+device)
+        return await GenerateAuthResponseAsync(user, deviceIdentifier);
     }
 
     /// <inheritdoc />
@@ -91,18 +126,21 @@ public class AuthService : IAuthService
     }
 
     /// <summary>
-    /// Generates JWT token and authentication response.
+    /// Generates JWT token, refresh token, and authentication response.
     /// </summary>
     /// <param name="user">User entity.</param>
-    /// <returns>Authentication response with token.</returns>
-    private AuthResponseDto GenerateAuthResponse(User user)
+    /// <param name="deviceIdentifier">Device identifier for the refresh token.</param>
+    /// <returns>Authentication response with tokens.</returns>
+    private async Task<AuthResponseDto> GenerateAuthResponseAsync(User user, string deviceIdentifier)
     {
-        var expiresAt = DateTime.UtcNow.AddDays(7);
-        var token = GenerateJwtToken(user, expiresAt);
+        var expiresAt = DateTime.UtcNow.AddMinutes(AccessTokenExpiryMinutes);
+        var accessToken = GenerateJwtToken(user, expiresAt);
+        var refreshToken = await CreateOrUpdateRefreshTokenAsync(user.Id, deviceIdentifier);
 
         return new AuthResponseDto
         {
-            Token = token,
+            Token = accessToken,
+            RefreshToken = refreshToken.Token,
             ExpiresAt = expiresAt,
             User = new UserDto
             {
@@ -111,6 +149,87 @@ public class AuthService : IAuthService
                 Email = user.Email
             }
         };
+    }
+
+    /// <summary>
+    /// Creates or replaces the refresh token for a given user and device.
+    /// If a token already exists for the composite key (UserId, DeviceIdentifier), it is updated in place.
+    /// </summary>
+    /// <param name="userId">User ID.</param>
+    /// <param name="deviceIdentifier">Device identifier.</param>
+    /// <returns>The created or updated refresh token entity.</returns>
+    private async Task<RefreshToken> CreateOrUpdateRefreshTokenAsync(int userId, string deviceIdentifier)
+    {
+        var existingToken = await _context.RefreshTokens.FindAsync(userId, deviceIdentifier);
+
+        if (existingToken != null)
+        {
+            existingToken.Token = GenerateSecureToken();
+            existingToken.CreatedAt = DateTime.UtcNow;
+            existingToken.ExpiresAt = DateTime.UtcNow.AddDays(RefreshTokenExpiryDays);
+            existingToken.IsRevoked = false;
+
+            await _context.SaveChangesAsync();
+            return existingToken;
+        }
+
+        var refreshToken = new RefreshToken
+        {
+            UserId = userId,
+            DeviceIdentifier = deviceIdentifier,
+            Token = GenerateSecureToken(),
+            CreatedAt = DateTime.UtcNow,
+            ExpiresAt = DateTime.UtcNow.AddDays(RefreshTokenExpiryDays),
+            IsRevoked = false
+        };
+
+        _context.RefreshTokens.Add(refreshToken);
+        await _context.SaveChangesAsync();
+
+        return refreshToken;
+    }
+
+    /// <summary>
+    /// Generates a cryptographically secure random token string.
+    /// </summary>
+    /// <returns>A base64-encoded secure token.</returns>
+    private static string GenerateSecureToken()
+    {
+        var randomBytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+
+    /// <summary>
+    /// Extracts the ClaimsPrincipal from an expired JWT token without validating its lifetime.
+    /// </summary>
+    /// <param name="token">The expired JWT token.</param>
+    /// <returns>The ClaimsPrincipal extracted from the token.</returns>
+    private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var jwtKey = _configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
+        var tokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidateIssuer = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateLifetime = false,
+            ValidIssuer = _configuration["Jwt:Issuer"],
+            ValidAudience = _configuration["Jwt:Audience"]
+        };
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+
+        if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+            !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+        {
+            throw new UnauthorizedAccessException("Invalid token.");
+        }
+
+        return principal;
     }
 
     /// <summary>

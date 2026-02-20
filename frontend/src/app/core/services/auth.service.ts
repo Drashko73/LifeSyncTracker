@@ -1,9 +1,9 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import { Observable, tap, catchError, throwError, BehaviorSubject, switchMap, filter, take } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { User, LoginDto, RegisterDto, AuthResponse, ApiResponse } from '../models';
+import { User, LoginDto, RegisterDto, AuthResponse, ApiResponse, RefreshTokenDto } from '../models';
 
 /**
  * Service for handling authentication operations.
@@ -15,13 +15,24 @@ import { User, LoginDto, RegisterDto, AuthResponse, ApiResponse } from '../model
 export class AuthService {
   private readonly apiUrl = `${environment.apiUrl}/auth`;
   private readonly TOKEN_KEY = 'lifesync_token';
+  private readonly REFRESH_TOKEN_KEY = 'lifesync_refresh_token';
   private readonly USER_KEY = 'lifesync_user';
+  private readonly DEVICE_ID_KEY = 'lifesync_device_id';
 
   /** Signal holding the current user */
   private currentUserSignal = signal<User | null>(null);
   
   /** Signal holding the authentication token */
   private tokenSignal = signal<string | null>(null);
+
+  /** Signal holding the refresh token */
+  private refreshTokenSignal = signal<string | null>(null);
+
+  /** Whether a token refresh is currently in progress */
+  private isRefreshing = false;
+
+  /** Subject that emits when a token refresh completes */
+  private refreshTokenSubject = new BehaviorSubject<string | null>(null);
 
   /** Computed signal to check if user is authenticated */
   readonly isAuthenticated = computed(() => !!this.tokenSignal());
@@ -34,6 +45,7 @@ export class AuthService {
     private router: Router
   ) {
     this.loadStoredAuth();
+    this.ensureDeviceId();
   }
 
   /**
@@ -48,6 +60,11 @@ export class AuthService {
         const user = JSON.parse(userStr) as User;
         this.tokenSignal.set(token);
         this.currentUserSignal.set(user);
+
+        const refreshToken = localStorage.getItem(this.REFRESH_TOKEN_KEY);
+        if (refreshToken) {
+          this.refreshTokenSignal.set(refreshToken);
+        }
       } catch {
         this.clearAuth();
       }
@@ -59,8 +76,10 @@ export class AuthService {
    */
   private storeAuth(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.token);
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
     localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
     this.tokenSignal.set(response.token);
+    this.refreshTokenSignal.set(response.refreshToken);
     this.currentUserSignal.set(response.user);
   }
 
@@ -69,9 +88,38 @@ export class AuthService {
    */
   private clearAuth(): void {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     this.tokenSignal.set(null);
+    this.refreshTokenSignal.set(null);
     this.currentUserSignal.set(null);
+  }
+
+  /**
+   * Ensures a unique device ID exists for this browser/device.
+   * Generates one if not already stored.
+   */
+  private ensureDeviceId(): void {
+    if (!localStorage.getItem(this.DEVICE_ID_KEY)) {
+      const deviceId = globalThis.crypto.randomUUID();
+      localStorage.setItem(this.DEVICE_ID_KEY, deviceId);
+    }
+  }
+
+  /**
+   * Gets the stored device ID.
+   * @returns The unique device identifier.
+   */
+  getDeviceId(): string {
+    return localStorage.getItem(this.DEVICE_ID_KEY)!;
+  }
+
+  /**
+   * Gets the current refresh token.
+   * @returns The refresh token or null if not available.
+   */
+  getRefreshToken(): string | null {
+    return this.refreshTokenSignal();
   }
 
   /**
@@ -115,6 +163,53 @@ export class AuthService {
       }),
       catchError(error => {
         console.error('Login error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Attempts to refresh the access token using the stored refresh token.
+   * Queues concurrent callers so only one refresh request is made at a time.
+   * @returns Observable with the new authentication response.
+   */
+  refreshAccessToken(): Observable<ApiResponse<AuthResponse>> {
+    if (this.isRefreshing) {
+      // Wait for the ongoing refresh to complete and return the new token
+      return this.refreshTokenSubject.pipe(
+        filter(token => token !== null),
+        take(1),
+        switchMap(() => {
+          // Return a simple success observable since the token is already refreshed
+          return new Observable<ApiResponse<AuthResponse>>(subscriber => {
+            subscriber.next({ success: true, data: { token: this.tokenSignal()!, refreshToken: this.refreshTokenSignal()!, expiresAt: new Date(), user: this.currentUserSignal()! } });
+            subscriber.complete();
+          });
+        })
+      );
+    }
+
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
+
+    const dto: RefreshTokenDto = {
+      accessToken: this.tokenSignal()!,
+      refreshToken: this.refreshTokenSignal()!
+    };
+
+    return this.http.post<ApiResponse<AuthResponse>>(`${this.apiUrl}/refresh`, dto, {
+      headers: { 'X-Device-Id': this.getDeviceId() }
+    }).pipe(
+      tap(response => {
+        this.isRefreshing = false;
+        if (response.success && response.data) {
+          this.storeAuth(response.data);
+          this.refreshTokenSubject.next(response.data.token);
+        }
+      }),
+      catchError(error => {
+        this.isRefreshing = false;
+        this.refreshTokenSubject.next(null);
         return throwError(() => error);
       })
     );

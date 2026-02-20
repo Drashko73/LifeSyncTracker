@@ -70,4 +70,9 @@ public class User
     /// Tags created by this user.
     /// </summary>
     public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
+
+    /// <summary>
+    /// Refresh tokens associated with this user.
+    /// </summary>
+    public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

@@ -29,8 +29,17 @@ export interface LoginDto {
  */
 export interface AuthResponse {
   token: string;
+  refreshToken: string;
   expiresAt: Date;
   user: User;
+}
+
+/**
+ * DTO for refreshing an access token.
+ */
+export interface RefreshTokenDto {
+  accessToken: string;
+  refreshToken: string;
 }
 
 /**
