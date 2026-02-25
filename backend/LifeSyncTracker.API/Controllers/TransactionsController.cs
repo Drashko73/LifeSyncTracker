@@ -73,15 +73,22 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<TransactionCategoryDto>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<TransactionCategoryDto>>> UpdateCategory(int id, [FromBody] UpdateTransactionCategoryDto dto)
     {
-        var userId = GetUserId();
-        var category = await _transactionService.UpdateCategoryAsync(userId, id, dto);
-
-        if (category == null)
+        try
         {
-            return NotFound(ApiResponse<TransactionCategoryDto>.ErrorResponse("Category not found or is a system category."));
-        }
+            var userId = GetUserId();
+            var category = await _transactionService.UpdateCategoryAsync(userId, id, dto);
 
-        return Ok(ApiResponse<TransactionCategoryDto>.SuccessResponse(category, "Category updated successfully."));
+            if (category == null)
+            {
+                return NotFound(ApiResponse<TransactionCategoryDto>.ErrorResponse("Category not found or is a system category."));
+            }
+
+            return Ok(ApiResponse<TransactionCategoryDto>.SuccessResponse(category, "Category updated successfully."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<TagDto>.ErrorResponse(ex.Message));
+        }
     }
 
     /// <summary>

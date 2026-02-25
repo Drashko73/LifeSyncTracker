@@ -17,9 +17,9 @@ public static class DatabaseSeeder
     /// Ensures default system transaction categories exist in the database.
     /// Existing rows are replaced so that names are always encrypted with the current key.
     /// </summary>
-    public static async Task SeedDefaultCategoriesAsync(ApplicationDbContext context)
+    public static async Task SeedDefaultCategoriesAsync(ApplicationDbContext context, AesEncryptionService encryptionService)
     {
-        var systemCategories = GetDefaultCategories();
+        var systemCategories = GetDefaultCategories(encryptionService);
 
         foreach (var seed in systemCategories)
         {
@@ -46,25 +46,25 @@ public static class DatabaseSeeder
         await context.SaveChangesAsync();
     }
 
-    private static List<TransactionCategory> GetDefaultCategories()
+    private static List<TransactionCategory> GetDefaultCategories(AesEncryptionService encryptionService)
     {
         return
         [
             // Income categories
-            new() { Id = 1, Name = "Salary", Type = TransactionType.Income, Icon = "pi-dollar", ColorCode = "#22C55E", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 2, Name = "Freelance", Type = TransactionType.Income, Icon = "pi-briefcase", ColorCode = "#3B82F6", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 3, Name = "Investment", Type = TransactionType.Income, Icon = "pi-chart-line", ColorCode = "#8B5CF6", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 4, Name = "Other Income", Type = TransactionType.Income, Icon = "pi-plus", ColorCode = "#10B981", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 1, Name = "Salary", NameHash = encryptionService.ComputeBlindIndex("Salary"), Type = TransactionType.Income, Icon = "pi-dollar", ColorCode = "#22C55E", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 2, Name = "Freelance", NameHash = encryptionService.ComputeBlindIndex("Freelance"), Type = TransactionType.Income, Icon = "pi-briefcase", ColorCode = "#3B82F6", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 3, Name = "Investment", NameHash = encryptionService.ComputeBlindIndex("Investment"), Type = TransactionType.Income, Icon = "pi-chart-line", ColorCode = "#8B5CF6", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 4, Name = "Other Income", NameHash = encryptionService.ComputeBlindIndex("Other Income"), Type = TransactionType.Income, Icon = "pi-plus", ColorCode = "#10B981", IsSystem = true, CreatedAt = DateTime.UtcNow },
 
             // Expense categories
-            new() { Id = 5, Name = "Groceries", Type = TransactionType.Expense, Icon = "pi-shopping-cart", ColorCode = "#F59E0B", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 6, Name = "Rent", Type = TransactionType.Expense, Icon = "pi-home", ColorCode = "#EF4444", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 7, Name = "Utilities", Type = TransactionType.Expense, Icon = "pi-bolt", ColorCode = "#F97316", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 8, Name = "Transportation", Type = TransactionType.Expense, Icon = "pi-car", ColorCode = "#6366F1", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 9, Name = "Software Subscription", Type = TransactionType.Expense, Icon = "pi-desktop", ColorCode = "#EC4899", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 10, Name = "Entertainment", Type = TransactionType.Expense, Icon = "pi-ticket", ColorCode = "#14B8A6", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 11, Name = "Healthcare", Type = TransactionType.Expense, Icon = "pi-heart", ColorCode = "#F43F5E", IsSystem = true, CreatedAt = DateTime.UtcNow },
-            new() { Id = 12, Name = "Other Expense", Type = TransactionType.Expense, Icon = "pi-minus", ColorCode = "#64748B", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 5, Name = "Groceries", NameHash = encryptionService.ComputeBlindIndex("Groceries"), Type = TransactionType.Expense, Icon = "pi-shopping-cart", ColorCode = "#F59E0B", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 6, Name = "Rent", NameHash = encryptionService.ComputeBlindIndex("Rent"), Type = TransactionType.Expense, Icon = "pi-home", ColorCode = "#EF4444", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 7, Name = "Utilities", NameHash = encryptionService.ComputeBlindIndex("Utilities"), Type = TransactionType.Expense, Icon = "pi-bolt", ColorCode = "#F97316", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 8, Name = "Transportation", NameHash = encryptionService.ComputeBlindIndex("Transportation"), Type = TransactionType.Expense, Icon = "pi-car", ColorCode = "#6366F1", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 9, Name = "Software Subscription", NameHash = encryptionService.ComputeBlindIndex("Software Subscription"), Type = TransactionType.Expense, Icon = "pi-desktop", ColorCode = "#EC4899", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 10, Name = "Entertainment", NameHash = encryptionService.ComputeBlindIndex("Entertainment"), Type = TransactionType.Expense, Icon = "pi-ticket", ColorCode = "#14B8A6", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 11, Name = "Healthcare", NameHash = encryptionService.ComputeBlindIndex("Healthcare"), Type = TransactionType.Expense, Icon = "pi-heart", ColorCode = "#F43F5E", IsSystem = true, CreatedAt = DateTime.UtcNow },
+            new() { Id = 12, Name = "Other Expense", NameHash = encryptionService.ComputeBlindIndex("Other Expense"), Type = TransactionType.Expense, Icon = "pi-minus", ColorCode = "#64748B", IsSystem = true, CreatedAt = DateTime.UtcNow },
         ];
     }
 }

@@ -22,6 +22,13 @@ public class TransactionCategory
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
+    /// HMAC-SHA256 blind index of the transaction category name for searchable lookups.
+    /// </summary>
+    [Required]
+    [MaxLength(44)]
+    public string NameHash { get; set; } = string.Empty;
+
+    /// <summary>
     /// Type of transactions this category is for.
     /// </summary>
     [Required]

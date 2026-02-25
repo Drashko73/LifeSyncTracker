@@ -21,6 +21,13 @@ public class User
     public string Username { get; set; } = string.Empty;
 
     /// <summary>
+    /// HMAC-SHA256 blind index of the username for searchable lookups.
+    /// </summary>
+    [Required]
+    [MaxLength(44)]
+    public string UsernameHash { get; set; } = string.Empty;
+
+    /// <summary>
     /// BCrypt hashed password.
     /// </summary>
     [Required]
@@ -33,6 +40,13 @@ public class User
     [EmailAddress]
     [MaxLength(255)]
     public string Email { get; set; } = string.Empty;
+
+    /// <summary>
+    /// HMAC-SHA256 blind index of the email for searchable lookups.
+    /// </summary>
+    [Required]
+    [MaxLength(44)]
+    public string EmailHash { get; set; } = string.Empty;
 
     /// <summary>
     /// Date and time when the user was created.

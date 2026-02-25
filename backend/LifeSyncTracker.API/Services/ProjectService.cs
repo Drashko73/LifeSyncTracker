@@ -13,14 +13,17 @@ namespace LifeSyncTracker.API.Services;
 public class ProjectService : IProjectService
 {
     private readonly ApplicationDbContext _context;
+    private readonly AesEncryptionService _encryptionService;
 
     /// <summary>
     /// Initializes a new instance of the ProjectService.
     /// </summary>
     /// <param name="context">Database context.</param>
-    public ProjectService(ApplicationDbContext context)
+    /// <param name="encryptionService">AES encryption service for computing blind indexes.</param>
+    public ProjectService(ApplicationDbContext context, AesEncryptionService encryptionService)
     {
         _context = context;
+        _encryptionService = encryptionService;
     }
 
     /// <inheritdoc />
@@ -69,8 +72,11 @@ public class ProjectService : IProjectService
     /// <inheritdoc />
     public async Task<ProjectDto> CreateAsync(int userId, CreateProjectDto dto)
     {
+        // Compute blind index for project name
+        var nameHash = _encryptionService.ComputeBlindIndex(dto.Name);
+
         // Check if there is already a project with given name for this user
-        var exists = await _context.Projects.AnyAsync(project => project.Name.ToLower().Equals(dto.Name.ToLower()) && project.UserId == userId);
+        var exists = await _context.Projects.AnyAsync(project => project.NameHash == nameHash && project.UserId == userId);
 
         if (exists)
         {
@@ -80,6 +86,7 @@ public class ProjectService : IProjectService
         var project = new Project
         {
             Name = dto.Name,
+            NameHash = nameHash,
             ColorCode = dto.ColorCode,
             HourlyRate = dto.HourlyRate,
             AutoCreateIncome = dto.AutoCreateIncome,
@@ -102,7 +109,20 @@ public class ProjectService : IProjectService
 
         if (project == null) return null;
 
-        if (dto.Name != null) project.Name = dto.Name;
+        if (dto.Name != null)
+        {
+            // Compute blind index for project name
+            var nameHash = _encryptionService.ComputeBlindIndex(dto.Name);
+            // Check if there is already a project with given name for this user (excluding current project)
+            var exists = await _context.Projects.AnyAsync(p => p.Id != projectId && p.NameHash == nameHash && p.UserId == userId);
+            if (exists)
+            {
+                throw new InvalidOperationException("Failed to update the project. Project with the same name already exists.");
+            }
+            project.NameHash = nameHash;
+            project.Name = dto.Name;
+        }
+
         if (dto.ColorCode != null) project.ColorCode = dto.ColorCode;
         if (dto.HourlyRate.HasValue) project.HourlyRate = dto.HourlyRate;
         if (dto.AutoCreateIncome.HasValue) project.AutoCreateIncome = dto.AutoCreateIncome.Value;

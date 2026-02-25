@@ -19,6 +19,7 @@ public class AuthService : IAuthService
 {
     private readonly ApplicationDbContext _context;
     private readonly IConfiguration _configuration;
+    private readonly AesEncryptionService _encryptionService;
     private readonly int AccessTokenExpiryMinutes;
     private readonly int RefreshTokenExpiryDays;
 
@@ -27,10 +28,12 @@ public class AuthService : IAuthService
     /// </summary>
     /// <param name="context">Database context.</param>
     /// <param name="configuration">Application configuration.</param>
-    public AuthService(ApplicationDbContext context, IConfiguration configuration)
+    /// <param name="encryptionService">AES encryption service for computing blind indexes.</param>
+    public AuthService(ApplicationDbContext context, IConfiguration configuration, AesEncryptionService encryptionService)
     {
         _context = context;
         _configuration = configuration;
+        _encryptionService = encryptionService;
         AccessTokenExpiryMinutes = _configuration.GetValue("Jwt:AccessTokenExpiryMinutes", 15);
         RefreshTokenExpiryDays = _configuration.GetValue("RefreshToken:ExpiryDays", 7);
     }
@@ -38,14 +41,17 @@ public class AuthService : IAuthService
     /// <inheritdoc />
     public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto, string deviceIdentifier)
     {
-        // Check if username already exists
-        if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
+        var usernameHash = _encryptionService.ComputeBlindIndex(dto.Username);
+        var emailHash = _encryptionService.ComputeBlindIndex(dto.Email);
+
+        // Check if username already exists (by blind index)
+        if (await _context.Users.AnyAsync(u => u.UsernameHash == usernameHash))
         {
             throw new InvalidOperationException("Username already exists.");
         }
 
-        // Check if email already exists
-        if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+        // Check if email already exists (by blind index)
+        if (await _context.Users.AnyAsync(u => u.EmailHash == emailHash))
         {
             throw new InvalidOperationException("Email already exists.");
         }
@@ -54,7 +60,9 @@ public class AuthService : IAuthService
         var user = new User
         {
             Username = dto.Username,
+            UsernameHash = usernameHash,
             Email = dto.Email,
+            EmailHash = emailHash,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
             CreatedAt = DateTime.UtcNow
         };
@@ -69,9 +77,12 @@ public class AuthService : IAuthService
     /// <inheritdoc />
     public async Task<AuthResponseDto> LoginAsync(LoginDto dto, string deviceIdentifier)
     {
-        // Find user by username or email
+        // Compute blind index of the provided credential
+        var credentialHash = _encryptionService.ComputeBlindIndex(dto.UsernameOrEmail);
+
+        // Find user by blind index on username or email
         var user = await _context.Users
-            .FirstOrDefaultAsync(u => u.Username == dto.UsernameOrEmail || u.Email == dto.UsernameOrEmail);
+            .FirstOrDefaultAsync(u => u.UsernameHash == credentialHash || u.EmailHash == credentialHash);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
         {

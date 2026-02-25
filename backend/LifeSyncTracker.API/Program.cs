@@ -114,8 +114,9 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var encryptionService1 = scope.ServiceProvider.GetRequiredService<AesEncryptionService>();
     dbContext.Database.Migrate();
-    await DatabaseSeeder.SeedDefaultCategoriesAsync(dbContext);
+    await DatabaseSeeder.SeedDefaultCategoriesAsync(dbContext, encryptionService1);
 }
 
 // Configure the HTTP request pipeline

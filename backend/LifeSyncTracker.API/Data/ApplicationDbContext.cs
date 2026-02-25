@@ -70,8 +70,9 @@ public class ApplicationDbContext : DbContext
         // User configuration
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasIndex(u => u.Username).IsUnique();
-            entity.HasIndex(u => u.Email).IsUnique();
+            // Unique indexes on deterministic blind-index columns (not encrypted)
+            entity.HasIndex(u => u.UsernameHash).IsUnique();
+            entity.HasIndex(u => u.EmailHash).IsUnique();
 
             entity.Property(u => u.Username).HasConversion(
                 v => v == null ? null : _encryptionService.Encrypt(v),

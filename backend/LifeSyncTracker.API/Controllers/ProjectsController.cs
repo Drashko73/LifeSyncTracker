@@ -95,15 +95,22 @@ public class ProjectsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse<ProjectDto>), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse<ProjectDto>>> Update(int id, [FromBody] UpdateProjectDto dto)
     {
-        var userId = GetUserId();
-        var project = await _projectService.UpdateAsync(userId, id, dto);
-
-        if (project == null)
+        try
         {
-            return NotFound(ApiResponse<ProjectDto>.ErrorResponse("Project not found."));
-        }
+            var userId = GetUserId();
+            var project = await _projectService.UpdateAsync(userId, id, dto);
 
-        return Ok(ApiResponse<ProjectDto>.SuccessResponse(project, "Project updated successfully."));
+            if (project == null)
+            {
+                return NotFound(ApiResponse<ProjectDto>.ErrorResponse("Project not found."));
+            }
+
+            return Ok(ApiResponse<ProjectDto>.SuccessResponse(project, "Project updated successfully."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<TagDto>.ErrorResponse(ex.Message));
+        }
     }
 
     /// <summary>

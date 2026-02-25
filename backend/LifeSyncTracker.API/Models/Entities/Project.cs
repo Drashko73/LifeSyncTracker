@@ -22,6 +22,13 @@ public class Project
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
+    /// HMAC-SHA256 blind index of the project name for searchable lookups.
+    /// </summary>
+    [Required]
+    [MaxLength(44)]
+    public string NameHash { get; set; } = string.Empty;
+
+    /// <summary>
     /// Color code for visual identification (e.g., "#FF5733").
     /// </summary>
     [MaxLength(20)]

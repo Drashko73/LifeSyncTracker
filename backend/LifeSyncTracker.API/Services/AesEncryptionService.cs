@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace LifeSyncTracker.API.Services;
 
@@ -21,7 +22,7 @@ public sealed class AesEncryptionService
     /// </summary>
     public string Encrypt(string plaintext)
     {
-        var plaintextBytes = System.Text.Encoding.UTF8.GetBytes(plaintext);
+        var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
         var nonce = new byte[AesGcm.NonceByteSizes.MaxSize]; // 12 bytes
         RandomNumberGenerator.Fill(nonce);
 
@@ -59,6 +60,20 @@ public sealed class AesEncryptionService
         using var aes = new AesGcm(_key, tagSize);
         aes.Decrypt(nonce, ciphertext, tag, plaintext);
 
-        return System.Text.Encoding.UTF8.GetString(plaintext);
+        return Encoding.UTF8.GetString(plaintext);
+    }
+
+    /// <summary>
+    /// Computes a deterministic HMAC-SHA256 hash for use as a blind index.
+    /// The input is normalized to lowercase to enable case-insensitive lookups.
+    /// </summary>
+    /// <param name="plaintext">The plaintext value to hash.</param>
+    /// <returns>A Base64-encoded HMAC-SHA256 hash.</returns>
+    public string ComputeBlindIndex(string plaintext)
+    {
+        var inputBytes = Encoding.UTF8.GetBytes(plaintext.ToLowerInvariant());
+        using var hmac = new HMACSHA256(_key);
+        var hash = hmac.ComputeHash(inputBytes);
+        return Convert.ToBase64String(hash);
     }
 }

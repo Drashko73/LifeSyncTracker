@@ -13,14 +13,17 @@ namespace LifeSyncTracker.API.Services;
 public class TransactionService : ITransactionService
 {
     private readonly ApplicationDbContext _context;
+    private readonly AesEncryptionService _encryptionService;
 
     /// <summary>
     /// Initializes a new instance of the TransactionService.
     /// </summary>
     /// <param name="context">Database context.</param>
-    public TransactionService(ApplicationDbContext context)
+    /// <param name="encryptionService">AES encryption service for computing blind indexes.</param>
+    public TransactionService(ApplicationDbContext context, AesEncryptionService encryptionService)
     {
         _context = context;
+        _encryptionService = encryptionService;
     }
 
     /// <inheritdoc />
@@ -37,9 +40,12 @@ public class TransactionService : ITransactionService
     /// <inheritdoc />
     public async Task<TransactionCategoryDto> CreateCategoryAsync(int userId, CreateTransactionCategoryDto dto)
     {
+        // Compute blind index for category name to enforce uniqueness without storing plaintext
+        var nameHash = _encryptionService.ComputeBlindIndex(dto.Name.ToLower());
+
         // Check for duplicate category name for this user
         var exists = await _context.TransactionCategories
-            .AnyAsync(c => (c.UserId == userId || c.IsSystem) && c.Name.ToLower().Equals(dto.Name.ToLower()));
+            .AnyAsync(c => (c.UserId == userId || c.IsSystem) && c.NameHash == nameHash);
 
         if (exists)
         {
@@ -49,6 +55,7 @@ public class TransactionService : ITransactionService
         var category = new TransactionCategory
         {
             Name = dto.Name,
+            NameHash = nameHash,
             Type = dto.Type,
             Icon = dto.Icon,
             ColorCode = dto.ColorCode,
@@ -71,7 +78,20 @@ public class TransactionService : ITransactionService
 
         if (category == null) return null;
 
-        if (dto.Name != null) category.Name = dto.Name;
+        if (dto.Name != null)
+        {
+            var nameHash = _encryptionService.ComputeBlindIndex(dto.Name.ToLower());
+            // Check for duplicate category name for this user
+            var exists = await _context.TransactionCategories
+                .AnyAsync(c => (c.UserId == userId || c.IsSystem) && c.NameHash == nameHash && c.Id != categoryId);
+            if (exists)
+            {
+                throw new InvalidOperationException("Failed to update category. Category with the same name already exists.");
+            }
+            category.Name = dto.Name;
+            category.NameHash = nameHash;
+        }
+
         if (dto.Icon != null) category.Icon = dto.Icon;
         if (dto.ColorCode != null) category.ColorCode = dto.ColorCode;
 
