@@ -3,6 +3,7 @@ using System;
 using LifeSyncTracker.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace LifeSyncTracker.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260225130852_AddEncryptionColumnTypes")]
+    partial class AddEncryptionColumnTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -282,7 +285,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8965),
                             Icon = "pi-dollar",
                             IsSystem = true,
-                            Name = "yWB0vP8kh1d0rJqXcpsaf5gJBvQ7InRwVYV+NalvUWQi3A==",
+                            Name = "VPuRmF5tVOcAgevnyedCE5z8eSTwUOS6g8Av4G5ll+dpEQ==",
                             Type = 0
                         },
                         new
@@ -292,7 +295,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8969),
                             Icon = "pi-briefcase",
                             IsSystem = true,
-                            Name = "465RG1bDbuK8iIqtxDXG1GKv2v9+mh+AxqxB/iwaLVC490KMQA==",
+                            Name = "k8Hf7RTUJ4KZt4HGGliz2kKZaKFYzXYubjRMWtKMRDd/qYv/Xw==",
                             Type = 0
                         },
                         new
@@ -302,7 +305,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8971),
                             Icon = "pi-chart-line",
                             IsSystem = true,
-                            Name = "dQF4cnhqM3L0z/dRWAepAd2T0pMzGsyep3JQ3VjAXisDxiAib4o=",
+                            Name = "wS23JsxN4tqmCdp+UPUdvGXBvbPJsH+9MyT5BoV8crTl4Hj1Qn0=",
                             Type = 0
                         },
                         new
@@ -312,7 +315,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8972),
                             Icon = "pi-plus",
                             IsSystem = true,
-                            Name = "a8nPBe8TI0BwVVNo0UBHMnzBAZ5F1peDNmeL0xkax5TicCz/kNQIsA==",
+                            Name = "lcAq8e15fLjHElomI6qJeo+7fSD/xhOneJLcK/tw6sN2oXRgBHyWTw==",
                             Type = 0
                         },
                         new
@@ -322,7 +325,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8973),
                             Icon = "pi-shopping-cart",
                             IsSystem = true,
-                            Name = "bgVRZ8X5ftskdRb9rMqp2ujoUp4E/sC04ny41CoT9P6X/0Q+Uw==",
+                            Name = "NnoB5MkW/X1U3Wl5iu3njXzm31YvXXxMB+WtTj8HoX6pQLK3jQ==",
                             Type = 1
                         },
                         new
@@ -332,7 +335,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8974),
                             Icon = "pi-home",
                             IsSystem = true,
-                            Name = "oMs+DOQOAJO8O+8UjXd1UsQcl/FrceMbo1xCgFKbZaI=",
+                            Name = "SbOzjn/D+UVHSxrFlw8YzImb7mWrPWBQ4uZwYNwrFKM=",
                             Type = 1
                         },
                         new
@@ -342,7 +345,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8975),
                             Icon = "pi-bolt",
                             IsSystem = true,
-                            Name = "9zlkQ5bUPTe5JC1K244VNe9FVu4t/5Wio6gywaD5d1tcfndAhg==",
+                            Name = "FGewroCCfzF73A7scmcxVSyxtbPnULPFM9eoR93pUZ9nQ+smyg==",
                             Type = 1
                         },
                         new
@@ -352,7 +355,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8976),
                             Icon = "pi-car",
                             IsSystem = true,
-                            Name = "Ah8WMj4tNNe7zMIDmPdIadugoYESDuxHHzgv9jmkZlR/Yu8Pu3wIOsBc",
+                            Name = "wcj19KhfkA4K21pHRczie/VDoj9HCw9LCe5hHBCy9oFVi1NDfjonG4H5",
                             Type = 1
                         },
                         new
@@ -362,7 +365,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8977),
                             Icon = "pi-desktop",
                             IsSystem = true,
-                            Name = "eIYZQoghX/FSj7Ka9hEX8J4h7+uZfN17cn9f33cnLLkWmB8uTUO0AHM4NjCK2RYW6w==",
+                            Name = "gQbpGj/xnoHUUH45M84wreR3VHI9Zz8+5Iu0+aE1a0Obt+KuPMwF6pWawZNjkMUQbg==",
                             Type = 1
                         },
                         new
@@ -372,7 +375,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8978),
                             Icon = "pi-ticket",
                             IsSystem = true,
-                            Name = "kNVnjsa64kJ45AP/YOAnWcVjk5FiYCqsRaxjsg93mGc0Wt1POjZLLOI=",
+                            Name = "2OcT6uUbJZKGTV+NM9Rd29LwDV5PEiJnwnsBS4XbI+iwyQn0/2KKdEE=",
                             Type = 1
                         },
                         new
@@ -382,7 +385,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8980),
                             Icon = "pi-heart",
                             IsSystem = true,
-                            Name = "3Lr8+9PogYuJRRiOCpO7OC77qov9t8NmQ++NmYSS8deQjO8MVT0=",
+                            Name = "d7MGccc/VTvXnya5mdkQzjg0xwIrMxt1ZB6usV5a+kccakbYJNQ=",
                             Type = 1
                         },
                         new
@@ -392,7 +395,7 @@ namespace LifeSyncTracker.API.Migrations
                             CreatedAt = new DateTime(2026, 2, 25, 13, 8, 51, 81, DateTimeKind.Utc).AddTicks(8981),
                             Icon = "pi-minus",
                             IsSystem = true,
-                            Name = "QrcePszRE7o6BTW6FB7BrXSfScMmUI4lm6dixd1nrkHxEjhvlCnTBx4=",
+                            Name = "5J3xL96GXEXUBfb3JancxgIByy84WWAvZc/zPZGZ/PXciYcGfHwqdCY=",
                             Type = 1
                         });
                 });

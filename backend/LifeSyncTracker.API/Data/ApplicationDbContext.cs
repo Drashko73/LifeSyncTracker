@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using LifeSyncTracker.API.Models.Entities;
+using LifeSyncTracker.API.Services;
 
 namespace LifeSyncTracker.API.Data;
 
@@ -9,12 +10,18 @@ namespace LifeSyncTracker.API.Data;
 /// </summary>
 public class ApplicationDbContext : DbContext
 {
+    private readonly AesEncryptionService _encryptionService;
+
     /// <summary>
     /// Initializes a new instance of the ApplicationDbContext.
     /// </summary>
     /// <param name="options">Database context options.</param>
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    /// <param name="encryptionService">AES encryption service for encrypting sensitive data.</param>
+    public ApplicationDbContext(
+        DbContextOptions<ApplicationDbContext> options,
+        AesEncryptionService encryptionService) : base(options)
     {
+        _encryptionService = encryptionService;
     }
 
     /// <summary>
@@ -65,6 +72,14 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasIndex(u => u.Username).IsUnique();
             entity.HasIndex(u => u.Email).IsUnique();
+
+            entity.Property(u => u.Username).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
+
+            entity.Property(u => u.Email).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
         });
 
         // Project configuration
@@ -74,6 +89,20 @@ public class ApplicationDbContext : DbContext
                   .WithMany(u => u.Projects)
                   .HasForeignKey(p => p.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(p => p.Name).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
+
+            entity.Property(p => p.Description).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
+
+            entity.Property(p => p.HourlyRate)
+                .HasColumnType("text")
+                .HasConversion(
+                    v => v.HasValue ? _encryptionService.Encrypt(v.Value.ToString("F2")) : null,
+                    v => v == null ? (decimal?)null : decimal.Parse(_encryptionService.Decrypt(v)));
         });
 
         // Tag configuration
@@ -85,6 +114,10 @@ public class ApplicationDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(t => new { t.UserId, t.Name }).IsUnique();
+
+            entity.Property(t => t.Name).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
         });
 
         // TimeEntry configuration
@@ -109,6 +142,13 @@ public class ApplicationDbContext : DbContext
 
             entity.HasIndex(te => te.StartTime);
             entity.HasIndex(te => new { te.UserId, te.IsRunning });
+
+            entity.Property(te => te.Description).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
+            entity.Property(te => te.NextSteps).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
         });
 
         // TransactionCategory configuration
@@ -118,6 +158,10 @@ public class ApplicationDbContext : DbContext
                   .WithMany(u => u.TransactionCategories)
                   .HasForeignKey(tc => tc.UserId)
                   .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(tc => tc.Name).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
         });
 
         // Transaction configuration
@@ -140,6 +184,16 @@ public class ApplicationDbContext : DbContext
 
             entity.HasIndex(t => t.Date);
             entity.HasIndex(t => new { t.UserId, t.Date });
+
+            entity.Property(t => t.Amount)
+                .HasColumnType("text")
+                .HasConversion(
+                    v => _encryptionService.Encrypt(v.ToString("F2")),
+                    v => decimal.Parse(_encryptionService.Decrypt(v)));
+
+            entity.Property(t => t.Description).HasConversion(
+                v => v == null ? null : _encryptionService.Encrypt(v),
+                v => v == null ? string.Empty : _encryptionService.Decrypt(v));
         });
 
         // RefreshToken configuration

@@ -15,6 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("PostgresConnection")));
 
+// Configure AES Encryption Service with a 256-bit key from configuration
+var encryptionBase64 = builder.Configuration["Encryption:Key"] ?? throw new InvalidOperationException("Encryption key not configured");
+var encryptionService = new AesEncryptionService(Convert.FromBase64String(encryptionBase64));
+builder.Services.AddSingleton(encryptionService);
+
 // Configure JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
