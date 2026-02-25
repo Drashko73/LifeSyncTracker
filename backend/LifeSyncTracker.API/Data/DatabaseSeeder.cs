@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using LifeSyncTracker.API.Models.Entities;
+using LifeSyncTracker.API.Services;
 
 namespace LifeSyncTracker.API.Data;
 
