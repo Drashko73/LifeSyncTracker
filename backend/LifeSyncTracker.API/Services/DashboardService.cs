@@ -13,19 +13,16 @@ public class DashboardService : IDashboardService
 {
     private readonly ApplicationDbContext _context;
     private readonly ITimeEntryService _timeEntryService;
-    private readonly IWebHostEnvironment _environment;
 
     /// <summary>
     /// Initializes a new instance of the DashboardService.
     /// </summary>
     /// <param name="context">Database context.</param>
     /// <param name="timeEntryService">Time entry service.</param>
-    /// <param name="environment">Web host environment.</param>
-    public DashboardService(ApplicationDbContext context, ITimeEntryService timeEntryService, IWebHostEnvironment environment)
+    public DashboardService(ApplicationDbContext context, ITimeEntryService timeEntryService)
     {
         _context = context;
         _timeEntryService = timeEntryService;
-        _environment = environment;
     }
 
     /// <inheritdoc />
@@ -55,46 +52,23 @@ public class DashboardService : IDashboardService
                 && te.DurationMinutes.HasValue)
             .SumAsync(te => te.DurationMinutes ?? 0);
 
-        decimal monthlyIncome;
-        decimal monthlyExpenses;
+        // Transaction.Amount is encrypted (stored as text), so SUM() cannot
+        // run server-side. Materialize first, then aggregate in memory.
+        var incomeTransactions = await _context.Transactions
+            .Include(t => t.Category)
+            .Where(t => t.UserId == userId
+                && t.Date >= startOfMonth
+                && t.Category.Type == TransactionType.Income)
+            .ToListAsync();
+        var monthlyIncome = incomeTransactions.Sum(t => t.Amount);
 
-        if (_environment.IsDevelopment())
-        {
-            // SQLite doesn't support Sum on decimals. We need to do it in memory.
-            var incomeTransactions = await _context.Transactions
-                .Include(t => t.Category)
-                .Where(t => t.UserId == userId
-                    && t.Date >= startOfMonth
-                    && t.Category.Type == TransactionType.Income)
-                .ToListAsync();
-            monthlyIncome = incomeTransactions.Sum(t => t.Amount);
-
-            var expenseTransactions = await _context.Transactions
-                .Include(t => t.Category)
-                .Where(t => t.UserId == userId
-                    && t.Date >= startOfMonth
-                    && t.Category.Type == TransactionType.Expense)
-                .ToListAsync();
-            monthlyExpenses = expenseTransactions.Sum(t => t.Amount);
-        }
-        else
-        {
-            // Calculate monthly income
-            monthlyIncome = await _context.Transactions
-                .Include(t => t.Category)
-                .Where(t => t.UserId == userId
-                    && t.Date >= startOfMonth
-                    && t.Category.Type == TransactionType.Income)
-                .SumAsync(t => t.Amount);
-
-            // Calculate monthly expenses
-            monthlyExpenses = await _context.Transactions
-                .Include(t => t.Category)
-                .Where(t => t.UserId == userId
-                    && t.Date >= startOfMonth
-                    && t.Category.Type == TransactionType.Expense)
-                .SumAsync(t => t.Amount);
-        }
+        var expenseTransactions = await _context.Transactions
+            .Include(t => t.Category)
+            .Where(t => t.UserId == userId
+                && t.Date >= startOfMonth
+                && t.Category.Type == TransactionType.Expense)
+            .ToListAsync();
+        var monthlyExpenses = expenseTransactions.Sum(t => t.Amount);
 
         // Get active projects count
         var activeProjectsCount = await _context.Projects
