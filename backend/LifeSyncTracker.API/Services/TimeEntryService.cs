@@ -232,6 +232,12 @@ public class TimeEntryService : ITimeEntryService
     /// <inheritdoc />
     public async Task<TimeEntryDto?> UpdateAsync(int userId, int entryId, UpdateTimeEntryDto dto)
     {
+        // Convert times to UTC for consistency
+        if (dto.StartTime.HasValue)
+            dto.StartTime = dto.StartTime.Value.ToUniversalTime();
+        if (dto.EndTime.HasValue)
+            dto.EndTime = dto.EndTime.Value.ToUniversalTime();
+
         var entry = await _context.TimeEntries
             .Include(te => te.Project)
             .Include(te => te.Tags)

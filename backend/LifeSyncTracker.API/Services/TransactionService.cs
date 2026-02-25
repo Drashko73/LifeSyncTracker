@@ -193,6 +193,12 @@ public class TransactionService : ITransactionService
     /// <inheritdoc />
     public async Task<TransactionDto?> UpdateTransactionAsync(int userId, int transactionId, UpdateTransactionDto dto)
     {
+        // Convert times to UTC to ensure consistency
+        if (dto.Date.HasValue)
+        {
+            dto.Date = dto.Date.Value.ToUniversalTime();
+        }
+
         var transaction = await _context.Transactions
             .Include(t => t.Category)
             .FirstOrDefaultAsync(t => t.Id == transactionId && t.UserId == userId);
