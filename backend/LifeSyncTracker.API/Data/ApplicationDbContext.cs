@@ -208,33 +208,5 @@ public class ApplicationDbContext : DbContext
 
             entity.HasIndex(rt => rt.Token).IsUnique();
         });
-
-        // Seed default transaction categories
-        SeedDefaultCategories(modelBuilder);
-    }
-
-    /// <summary>
-    /// Seeds default transaction categories.
-    /// </summary>
-    /// <param name="modelBuilder">The model builder.</param>
-    private static void SeedDefaultCategories(ModelBuilder modelBuilder)
-    {
-        modelBuilder.Entity<TransactionCategory>().HasData(
-            // Income categories
-            new TransactionCategory { Id = 1, Name = "Salary", Type = TransactionType.Income, Icon = "pi-dollar", ColorCode = "#22C55E", IsSystem = true },
-            new TransactionCategory { Id = 2, Name = "Freelance", Type = TransactionType.Income, Icon = "pi-briefcase", ColorCode = "#3B82F6", IsSystem = true },
-            new TransactionCategory { Id = 3, Name = "Investment", Type = TransactionType.Income, Icon = "pi-chart-line", ColorCode = "#8B5CF6", IsSystem = true },
-            new TransactionCategory { Id = 4, Name = "Other Income", Type = TransactionType.Income, Icon = "pi-plus", ColorCode = "#10B981", IsSystem = true },
-
-            // Expense categories
-            new TransactionCategory { Id = 5, Name = "Groceries", Type = TransactionType.Expense, Icon = "pi-shopping-cart", ColorCode = "#F59E0B", IsSystem = true },
-            new TransactionCategory { Id = 6, Name = "Rent", Type = TransactionType.Expense, Icon = "pi-home", ColorCode = "#EF4444", IsSystem = true },
-            new TransactionCategory { Id = 7, Name = "Utilities", Type = TransactionType.Expense, Icon = "pi-bolt", ColorCode = "#F97316", IsSystem = true },
-            new TransactionCategory { Id = 8, Name = "Transportation", Type = TransactionType.Expense, Icon = "pi-car", ColorCode = "#6366F1", IsSystem = true },
-            new TransactionCategory { Id = 9, Name = "Software Subscription", Type = TransactionType.Expense, Icon = "pi-desktop", ColorCode = "#EC4899", IsSystem = true },
-            new TransactionCategory { Id = 10, Name = "Entertainment", Type = TransactionType.Expense, Icon = "pi-ticket", ColorCode = "#14B8A6", IsSystem = true },
-            new TransactionCategory { Id = 11, Name = "Healthcare", Type = TransactionType.Expense, Icon = "pi-heart", ColorCode = "#F43F5E", IsSystem = true },
-            new TransactionCategory { Id = 12, Name = "Other Expense", Type = TransactionType.Expense, Icon = "pi-minus", ColorCode = "#64748B", IsSystem = true }
-        );
     }
 }
