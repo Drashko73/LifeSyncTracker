@@ -38,4 +38,15 @@ public interface IAuthService
     /// <param name="userId">User ID.</param>
     /// <returns>User information.</returns>
     Task<UserDto?> GetCurrentUserAsync(int userId);
+
+    /// <summary>
+    /// Asynchronously changes the password for the specified user.
+    /// </summary>
+    /// <remarks>Throws an exception if the user ID is invalid or if the new password does not meet security
+    /// requirements.</remarks>
+    /// <param name="userId">The unique identifier of the user whose password is to be changed. Must correspond to an existing user.</param>
+    /// <param name="dto">An object containing the new password and any required validation information for the password change. Cannot be
+    /// null.</param>
+    /// <returns>A task that represents the asynchronous password change operation.</returns>
+    Task ChangePasswordAsync(int userId, ChangePasswordDto dto);
 }

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, tap, catchError, throwError, BehaviorSubject, switchMap, filter, take } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { User, LoginDto, RegisterDto, AuthResponse, ApiResponse, RefreshTokenDto } from '../models';
+import { User, LoginDto, RegisterDto, AuthResponse, ApiResponse, RefreshTokenDto, ChangePasswordDto } from '../models';
 
 /**
  * Service for handling authentication operations.
@@ -245,5 +245,19 @@ export class AuthService {
    */
   getCurrentUser(): Observable<ApiResponse<User>> {
     return this.http.get<ApiResponse<User>>(`${this.apiUrl}/me`);
+  }
+
+  /**
+   * Changes the current user's password.
+   * @param dto Current and new password.
+   * @returns Observable with API response.
+   */
+  changePassword(dto: ChangePasswordDto): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`${this.apiUrl}/change-password`, dto).pipe(
+      catchError(error => {
+        console.error('Change password error:', error);
+        return throwError(() => error);
+      })
+    );
   }
 }

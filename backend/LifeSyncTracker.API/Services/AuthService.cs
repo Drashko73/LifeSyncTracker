@@ -132,8 +132,29 @@ public class AuthService : IAuthService
         {
             Id = user.Id,
             Username = user.Username,
-            Email = user.Email
+            Email = user.Email,
+            Created = user.CreatedAt,
+            Updated = user.UpdatedAt ?? user.CreatedAt
         };
+    }
+
+    /// <inheritdoc />
+    public async Task ChangePasswordAsync(int userId, ChangePasswordDto dto)
+    {
+        // Check if user exists
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return;
+
+        // Verify current password
+        if (!BCrypt.Net.BCrypt.Verify(dto.CurrentPassword, user.PasswordHash))
+        {
+            throw new InvalidOperationException("Current password is incorrect.");
+        }
+
+        // Update password
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+        user.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -157,7 +178,9 @@ public class AuthService : IAuthService
             {
                 Id = user.Id,
                 Username = user.Username,
-                Email = user.Email
+                Email = user.Email,
+                Created = user.CreatedAt,
+                Updated = user.UpdatedAt ?? user.CreatedAt
             }
         };
     }

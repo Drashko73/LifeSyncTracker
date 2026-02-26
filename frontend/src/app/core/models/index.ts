@@ -5,6 +5,8 @@ export interface User {
   id: number;
   username: string;
   email: string;
+  created: Date;
+  updated: Date;
 }
 
 /**
@@ -352,6 +354,14 @@ export interface PaginatedResponse<T> {
   totalPages: number;
   hasNextPage: boolean;
   hasPreviousPage: boolean;
+}
+
+/**
+ * DTO for changing the user password.
+ */
+export interface ChangePasswordDto {
+  currentPassword: string;
+  newPassword: string;
 }
 
 /**

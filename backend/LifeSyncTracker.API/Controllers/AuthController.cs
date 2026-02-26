@@ -123,6 +123,29 @@ public class AuthController : ControllerBase
         return Ok(ApiResponse<UserDto>.SuccessResponse(user));
     }
 
+    [HttpPut("change-password")]
+    [Authorize]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<ApiResponse<string>>> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        try
+        {
+            var userId = GetUserId();
+            await _authService.ChangePasswordAsync(userId, dto);
+            return Ok(ApiResponse<string>.SuccessResponse("Password changed successfully.", "Password changed successfully."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(ApiResponse<string>.ErrorResponse(ex.Message));
+        }
+    }
+
     /// <summary>
     /// Gets the user ID from the JWT token claims.
     /// </summary>

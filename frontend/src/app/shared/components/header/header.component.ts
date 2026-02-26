@@ -5,6 +5,7 @@ import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { AvatarModule } from 'primeng/avatar';
 import { RippleModule } from 'primeng/ripple';
+import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
 import { TimeEntryService } from '../../../core/services/time-entry.service';
 import { ThemeService } from '../../../core/services/theme.service';
@@ -27,6 +28,7 @@ import { ThemeService } from '../../../core/services/theme.service';
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {
+  private router = inject(Router);
   protected authService = inject(AuthService);
   protected timeEntryService = inject(TimeEntryService);
   protected themeService = inject(ThemeService);
@@ -35,7 +37,7 @@ export class HeaderComponent {
     {
       label: 'Profile',
       icon: 'pi pi-user',
-      command: () => {}
+      command: () => this.router.navigate(['/profile'])
     },
     {
       separator: true

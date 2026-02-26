@@ -19,5 +19,15 @@
         /// Email address.
         /// </summary>
         public string Email { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Date and time when the user was created.
+        /// </summary>
+        public DateTime Created { get; set; }
+
+        /// <summary>
+        /// Date and time when the user was updated.
+        /// </summary>
+        public DateTime Updated { get; set; }
     }
 }
