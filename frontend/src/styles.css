@@ -66,18 +66,18 @@ html.dark-mode {
 }
 
 /* Heatmap Colors - Light Mode */
-.heatmap-0 { background-color: #f3f4f6; }
-.heatmap-1 { background-color: #bbf7d0; }
-.heatmap-2 { background-color: #4ade80; }
-.heatmap-3 { background-color: #16a34a; }
-.heatmap-4 { background-color: #166534; }
+.heatmap-0 { background-color: #f3f4f6; fill: #f3f4f6; }
+.heatmap-1 { background-color: #bbf7d0; fill: #bbf7d0; }
+.heatmap-2 { background-color: #4ade80; fill: #4ade80; }
+.heatmap-3 { background-color: #16a34a; fill: #16a34a; }
+.heatmap-4 { background-color: #166534; fill: #166534; }
 
 /* Heatmap Colors - Dark Mode */
-.dark-mode .heatmap-0 { background-color: #374151; }
-.dark-mode .heatmap-1 { background-color: #065f46; }
-.dark-mode .heatmap-2 { background-color: #047857; }
-.dark-mode .heatmap-3 { background-color: #059669; }
-.dark-mode .heatmap-4 { background-color: #10b981; }
+.dark-mode .heatmap-0 { background-color: #374151; fill: #374151; }
+.dark-mode .heatmap-1 { background-color: #065f46; fill: #065f46; }
+.dark-mode .heatmap-2 { background-color: #047857; fill: #047857; }
+.dark-mode .heatmap-3 { background-color: #059669; fill: #059669; }
+.dark-mode .heatmap-4 { background-color: #10b981; fill: #10b981; }
 
 /* Toast Customizations */
 .p-toast {

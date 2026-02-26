@@ -82,7 +82,7 @@ public class DashboardService : IDashboardService
         var monthlyFlow = await GetMonthlyFlowAsync(userId, 6);
 
         // Get productivity heatmap for current year
-        var productivityHeatmap = await GetProductivityHeatmapAsync(userId, now.Year);
+        var productivityHeatmap = await GetProductivityHeatmapAsync(userId, now.Year-1, now.Month, now.Day);
 
         return new DashboardStatsDto
         {
@@ -170,10 +170,10 @@ public class DashboardService : IDashboardService
     }
 
     /// <inheritdoc />
-    public async Task<List<DailyProductivityDto>> GetProductivityHeatmapAsync(int userId, int year)
+    public async Task<List<DailyProductivityDto>> GetProductivityHeatmapAsync(int userId, int year, int month, int day)
     {
-        var startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        var endDate = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
+        var startDate = new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
+        var endDate = DateTime.UtcNow.Date;
 
         var entries = await _context.TimeEntries
             .Where(te => te.UserId == userId

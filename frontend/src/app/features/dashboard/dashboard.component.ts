@@ -7,10 +7,11 @@ import { ChartModule } from 'primeng/chart';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
+import { NgxHeatmapCalendar, HeatMapDate, HeatMapEvent } from 'ngx-heatmap-calendar';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { TimeEntryService } from '../../core/services/time-entry.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
-import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../core/models';
+import { DashboardStats, TimeDistribution, MonthlyFlow, Currency, DailyProductivity } from '../../core/models';
 
 /**
  * Dashboard component showing overview statistics and charts.
@@ -25,7 +26,8 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency } from '../../c
     ButtonModule,
     ChartModule,
     ToastModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    NgxHeatmapCalendar,
   ],
   providers: [MessageService],
   templateUrl: './dashboard.component.html'
@@ -40,6 +42,24 @@ export class DashboardComponent implements OnInit {
   stats = signal<DashboardStats | null>(null);
   pieChartData = signal<any>(null);
   barChartData = signal<any>(null);
+  heatmapDates = signal<HeatMapDate[]>([]);
+
+  // Show the last 12 months in the heatmap
+  readonly heatmapEndDate = new Date();
+  readonly heatmapStartDate = new Date(
+    this.heatmapEndDate.getFullYear() - 1,
+    this.heatmapEndDate.getMonth(),
+    this.heatmapEndDate.getDate()
+  );
+
+  /** Maps an intensity level (0-4) to the matching CSS class. */
+  heatmapClassForValue = ({ value }: HeatMapDate): string => {
+    if (value === null || value === 0) return 'heatmap-0';
+    if (value === 1) return 'heatmap-1';
+    if (value === 2) return 'heatmap-2';
+    if (value === 3) return 'heatmap-3';
+    return 'heatmap-4';
+  };
 
   pieChartOptions = {
     plugins: {
@@ -80,6 +100,7 @@ export class DashboardComponent implements OnInit {
           this.stats.set(response.data);
           this.preparePieChartData(response.data.timeDistribution);
           this.prepareBarChartData(response.data.monthlyFlow);
+          this.prepareHeatmapData(response.data.productivityHeatmap);
         }
         this.isLoading.set(false);
       },
@@ -92,6 +113,28 @@ export class DashboardComponent implements OnInit {
         });
       }
     });
+  }
+
+  /**
+   * Converts backend productivity data into HeatMapDate[] for ngx-heatmap-calendar.
+   * Uses intensityLevel (0-4) as the value and constructs dates without timezone offset.
+   */
+  private prepareHeatmapData(productivity: DailyProductivity[]): void {
+    if (!productivity || productivity.length === 0) {
+      this.heatmapDates.set([]);
+      return;
+    }
+
+    this.heatmapDates.set(
+      productivity.map((d) => {
+        const raw = new Date(d.date);
+        // Reconstruct using local-date parts to avoid UTC-offset shifting the day
+        return {
+          date: new Date(raw.getFullYear(), raw.getMonth(), raw.getDate()),
+          value: d.intensityLevel,
+        };
+      })
+    );
   }
 
   /**
