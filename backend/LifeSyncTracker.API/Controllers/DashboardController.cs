@@ -71,19 +71,22 @@ public class DashboardController : ControllerBase
     /// <summary>
     /// Gets productivity heatmap data for a year.
     /// </summary>
-    /// <param name="year">Year (defaults to current year).</param>
-    /// <param name="month">Month (defaults to current month).</param>
-    /// <param name="day">Day (defaults to current day).</param>
+    /// <param name="fromYear">Year</param>
+    /// <param name="fromMonth">Month</param>
+    /// <param name="fromDay">Day</param>
+    /// <param name="toYear">Year</param>
+    /// <param name="toMonth">Month</param>
+    /// <param name="toDay">Day</param>
     /// <returns>Daily productivity data.</returns>
     [HttpGet("productivity-heatmap")]
     [ProducesResponseType(typeof(ApiResponse<List<DailyProductivityDto>>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<ApiResponse<List<DailyProductivityDto>>>> GetProductivityHeatmap([FromQuery] int? year = null, [FromQuery] int? month = null, [FromQuery] int? day = null)
+    public async Task<ActionResult<ApiResponse<List<DailyProductivityDto>>>> GetProductivityHeatmap([FromQuery] int fromYear, [FromQuery] int fromMonth, [FromQuery] int fromDay, [FromQuery] int? toYear = null, [FromQuery] int? toMonth = null, [FromQuery] int? toDay = null)
     {
         var userId = GetUserId();
-        var targetYear = year ?? DateTime.UtcNow.Year;
-        var targetMonth = month ?? DateTime.UtcNow.Month;
-        var targetDay = day ?? DateTime.UtcNow.Day;
-        var heatmap = await _dashboardService.GetProductivityHeatmapAsync(userId, targetYear, targetMonth, targetDay);
+        var targetYear = toYear ?? DateTime.UtcNow.Year;
+        var targetMonth = toMonth ?? DateTime.UtcNow.Month;
+        var targetDay = toDay ?? DateTime.UtcNow.Day;
+        var heatmap = await _dashboardService.GetProductivityHeatmapAsync(userId, fromYear, fromMonth, fromDay, targetYear, targetMonth, targetDay);
         return Ok(ApiResponse<List<DailyProductivityDto>>.SuccessResponse(heatmap));
     }
 

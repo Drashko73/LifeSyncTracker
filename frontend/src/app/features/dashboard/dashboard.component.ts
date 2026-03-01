@@ -1,14 +1,17 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { ChartModule } from 'primeng/chart';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { Select } from 'primeng/select';
 import { MessageService } from 'primeng/api';
 import { HeatmapCalendarComponent, HeatMapDate } from 'src/app/shared/components/heatmap-calendar/heatmap-calendar';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { AuthService } from '../../core/services/auth.service';
 import { TimeEntryService } from '../../core/services/time-entry.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import { DashboardStats, TimeDistribution, MonthlyFlow, Currency, DailyProductivity } from '../../core/models';
@@ -21,12 +24,14 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency, DailyProductiv
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterLink,
     CardModule,
     ButtonModule,
     ChartModule,
     ToastModule,
     ProgressSpinnerModule,
+    Select,
     HeatmapCalendarComponent
   ],
   providers: [MessageService],
@@ -34,6 +39,7 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency, DailyProductiv
 })
 export class DashboardComponent implements OnInit {
   private dashboardService = inject(DashboardService);
+  private authService = inject(AuthService);
   protected timeEntryService = inject(TimeEntryService);
   private messageService = inject(MessageService);
   protected userPreferencesService = inject(UserPreferencesService);
@@ -43,14 +49,49 @@ export class DashboardComponent implements OnInit {
   pieChartData = signal<any>(null);
   barChartData = signal<any>(null);
   heatmapDates = signal<HeatMapDate[]>([]);
+  heatmapLoading = signal(false);
 
-  // Show the last 12 months in the heatmap
-  readonly heatmapEndDate = new Date();
-  readonly heatmapStartDate = new Date(
-    this.heatmapEndDate.getFullYear() - 1,
-    this.heatmapEndDate.getMonth(),
-    this.heatmapEndDate.getDate()
-  );
+  /** Selected year for the heatmap. null means "Last year" (trailing 12 months). */
+  selectedYear = signal<number | null>(null);
+
+  /** Year options for the heatmap dropdown. */
+  yearOptions = computed<{ label: string; value: number | null }[]>(() => {
+    const currentYear = new Date().getFullYear();
+    const user = this.authService.currentUser();
+    const registrationYear = user?.created
+      ? new Date(user.created).getFullYear()
+      : currentYear;
+
+    const options: { label: string; value: number | null }[] = [
+      { label: 'Last year', value: null }
+    ];
+    for (let year = currentYear; year >= registrationYear; year--) {
+      options.push({ label: String(year), value: year });
+    }
+    return options;
+  });
+
+  /** Heatmap date range computed from the selected year. */
+  heatmapStartDate = computed(() => {
+    const year = this.selectedYear();
+    if (year === null) {
+      const now = new Date();
+      return new Date(now.getFullYear() - 1, now.getMonth(), now.getDate());
+    }
+    return new Date(year, 0, 1);
+  });
+
+  heatmapEndDate = computed(() => {
+    const year = this.selectedYear();
+    if (year === null) {
+      return new Date();
+    }
+    const now = new Date();
+    if (year === now.getFullYear()) {
+      return new Date(year, 11, 31);
+    }
+    return new Date(year, 11, 31);
+  });
 
   /** Maps an intensity level (0-4) to the matching CSS class. */
   heatmapClassForValue = ({ value }: HeatMapDate): string => {
@@ -88,6 +129,44 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDashboardData();
+  }
+
+  /**
+   * Handles year selection change for the productivity heatmap.
+   */
+  onHeatmapYearChange(year: number | null): void {
+    this.selectedYear.set(year);
+    this.loadHeatmapData(
+      this.heatmapStartDate().getFullYear(),
+      1,  // Always use January for start month when a specific year is selected
+      1,  // Always use 1 for start day when a specific year is selected
+      this.heatmapEndDate().getFullYear(),
+      12, // Always use December for end month when a specific year is selected
+      31  // Always use 31 for end day when a specific year is selected
+    );
+  }
+
+  /**
+   * Loads heatmap data for a specific date range.
+   */
+  private loadHeatmapData(fromYear: number, fromMonth: number, fromDay: number, toYear?: number, toMonth?: number, toDay?: number): void {
+    this.heatmapLoading.set(true);
+    this.dashboardService.getProductivityHeatmap(fromYear, fromMonth, fromDay, toYear, toMonth, toDay).subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.prepareHeatmapData(response.data);
+        }
+        this.heatmapLoading.set(false);
+      },
+      error: () => {
+        this.heatmapLoading.set(false);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to load heatmap data'
+        });
+      }
+    });
   }
 
   /**

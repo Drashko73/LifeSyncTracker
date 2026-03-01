@@ -144,21 +144,36 @@
     <!-- Productivity Heatmap -->
     <p-card>
         <ng-template pTemplate="header">
-        <div class="p-4 border-b dark:border-gray-700">
+        <div class="p-4 border-b dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Productivity Heatmap</h2>
+            <p-select
+              [options]="yearOptions()"
+              [ngModel]="selectedYear()"
+              (ngModelChange)="onHeatmapYearChange($event)"
+              optionLabel="label"
+              optionValue="value"
+              appendTo="body"
+              styleClass="w-36"
+            ></p-select>
         </div>
         </ng-template>
-        <div class="p-4 display-flex">
-        @if (stats()?.productivityHeatmap && stats()!.productivityHeatmap.length > 0) {
+        <div class="p-4">
+        @if (heatmapLoading()) {
+            <div class="flex justify-center items-center py-8">
+                <p-progressSpinner [style]="{width: '40px', height: '40px'}"></p-progressSpinner>
+            </div>
+        } @else if (heatmapDates().length > 0) {
+            <div class="flex flex-col items-center">
             <div class="overflow-x-auto">
             <app-heatmap-calendar
-                [startDate]="heatmapStartDate"
-                [endDate]="heatmapEndDate"
+                [startDate]="heatmapStartDate()"
+                [endDate]="heatmapEndDate()"
                 [dates]="heatmapDates()"
                 [classForValue]="heatmapClassForValue"
                 [showMonthLabel]="true"
                 [showDayLabel]="true"
             ></app-heatmap-calendar>
+            </div>
             <div class="flex items-center mt-4 text-sm text-gray-500 dark:text-gray-400">
                 <span class="mr-2">Less</span>
                 <div class="flex gap-1">

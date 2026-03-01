@@ -82,7 +82,7 @@ public class DashboardService : IDashboardService
         var monthlyFlow = await GetMonthlyFlowAsync(userId, 6);
 
         // Get productivity heatmap for current year
-        var productivityHeatmap = await GetProductivityHeatmapAsync(userId, now.Year-1, now.Month, now.Day);
+        var productivityHeatmap = await GetProductivityHeatmapAsync(userId, now.Year-1, now.Month, now.Day, now.Year, now.Month, now.Day);
 
         return new DashboardStatsDto
         {
@@ -170,10 +170,10 @@ public class DashboardService : IDashboardService
     }
 
     /// <inheritdoc />
-    public async Task<List<DailyProductivityDto>> GetProductivityHeatmapAsync(int userId, int year, int month, int day)
+    public async Task<List<DailyProductivityDto>> GetProductivityHeatmapAsync(int userId, int year, int month, int day, int toYear, int toMonth, int toDay)
     {
         var startDate = new DateTime(year, month, day, 0, 0, 0, DateTimeKind.Utc);
-        var endDate = DateTime.UtcNow.Date;
+        var endDate = new DateTime(toYear, toMonth, toDay, 23, 59, 59, DateTimeKind.Utc);
 
         var entries = await _context.TimeEntries
             .Where(te => te.UserId == userId
@@ -190,9 +190,8 @@ public class DashboardService : IDashboardService
         // Generate all days of the year
         var result = new List<DailyProductivityDto>();
         var currentDate = startDate;
-        var today = DateTime.UtcNow.Date;
 
-        while (currentDate <= endDate && currentDate <= today)
+        while (currentDate <= endDate)
         {
             var hours = dailyData.TryGetValue(currentDate.Date, out var h) ? h : 0;
             result.Add(new DailyProductivityDto

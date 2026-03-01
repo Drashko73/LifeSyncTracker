@@ -38,6 +38,9 @@ public interface IDashboardService
     /// <param name="year">Year.</param>
     /// <param name="month">Month.</param>
     /// <param name="day">Day.</param>
+    /// <param name="toYear">Year.</param>
+    /// <param name="toMonth">Month.</param>
+    /// <param name="toDay">Day.</param>
     /// <returns>Daily productivity data.</returns>
-    Task<List<DailyProductivityDto>> GetProductivityHeatmapAsync(int userId, int year, int month, int day);
+    Task<List<DailyProductivityDto>> GetProductivityHeatmapAsync(int userId, int year, int month, int day, int toYear, int toMonth, int toDay);
 }

@@ -48,11 +48,18 @@ export class DashboardService {
   }
 
   /**
-   * Gets productivity heatmap data for a year.
+   * Gets productivity heatmap data for a date range.
    */
-  getProductivityHeatmap(year?: number): Observable<ApiResponse<DailyProductivity[]>> {
+  getProductivityHeatmap(fromYear: number, fromMonth: number, fromDay: number, toYear?: number, toMonth?: number, toDay?: number): Observable<ApiResponse<DailyProductivity[]>> {
     let params = new HttpParams();
-    if (year) params = params.set('year', year.toString());
+    params = params.set('fromYear', fromYear.toString());
+    params = params.set('fromMonth', fromMonth.toString());
+    params = params.set('fromDay', fromDay.toString());
+    if (toYear !== undefined && toMonth !== undefined && toDay !== undefined) {
+      params = params.set('toYear', toYear.toString());
+      params = params.set('toMonth', toMonth.toString());
+      params = params.set('toDay', toDay.toString());
+    }
     return this.http.get<ApiResponse<DailyProductivity[]>>(`${this.apiUrl}/productivity-heatmap`, { params });
   }
 }
