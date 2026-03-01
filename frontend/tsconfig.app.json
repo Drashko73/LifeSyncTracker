@@ -7,11 +7,9 @@
     "types": []
   },
   "include": [
-    "src/**/*.ts",
-    "node_modules/ngx-heatmap-calendar/projects/ngx-heatmap-calendar/src/**/*.ts"
+    "src/**/*.ts"
   ],
   "exclude": [
     "src/**/*.spec.ts",
-    "node_modules/ngx-heatmap-calendar/projects/ngx-heatmap-calendar/src/**/*.spec.ts"
   ]
 }

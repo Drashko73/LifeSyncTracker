@@ -151,14 +151,14 @@
         <div class="p-4 display-flex">
         @if (stats()?.productivityHeatmap && stats()!.productivityHeatmap.length > 0) {
             <div class="overflow-x-auto">
-            <ngx-heatmap-calendar
+            <app-heatmap-calendar
                 [startDate]="heatmapStartDate"
                 [endDate]="heatmapEndDate"
                 [dates]="heatmapDates()"
                 [classForValue]="heatmapClassForValue"
                 [showMonthLabel]="true"
                 [showDayLabel]="true"
-            ></ngx-heatmap-calendar>
+            ></app-heatmap-calendar>
             <div class="flex items-center mt-4 text-sm text-gray-500 dark:text-gray-400">
                 <span class="mr-2">Less</span>
                 <div class="flex gap-1">

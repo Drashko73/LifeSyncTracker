@@ -4,11 +4,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {
-      "ngx-heatmap-calendar": [
-        "node_modules/ngx-heatmap-calendar/projects/ngx-heatmap-calendar/src/public-api.ts"
-      ]
-    },
+    "paths": {},
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,

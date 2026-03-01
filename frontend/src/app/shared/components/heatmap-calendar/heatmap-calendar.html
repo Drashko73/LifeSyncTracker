@@ -1,0 +1,28 @@
+<svg [attr.width]="svgWidth" [attr.height]="svgHeight" class="heatmap-svg">
+    <!-- Month labels -->
+    @for (label of monthLabels; track label.text + label.x) {
+    <text [attr.x]="label.x" y="10" font-size="10"
+            class="fill-gray-500 dark:fill-gray-400">{{ label.text }}</text>
+    }
+    <!-- Day labels -->
+    @if (showDayLabel) {
+    <text x="0" [attr.y]="headerHeight + cellSize * 1 + cellSize / 2 + 3" font-size="9"
+            class="fill-gray-400 dark:fill-gray-500">Mon</text>
+    <text x="0" [attr.y]="headerHeight + cellSize * 3 + cellSize / 2 + 3" font-size="9"
+            class="fill-gray-400 dark:fill-gray-500">Wed</text>
+    <text x="0" [attr.y]="headerHeight + cellSize * 5 + cellSize / 2 + 3" font-size="9"
+            class="fill-gray-400 dark:fill-gray-500">Fri</text>
+    }
+    <!-- Heatmap cells -->
+    @for (cell of cells; track cell.date.getTime()) {
+    <rect
+        [attr.x]="cell.x"
+        [attr.y]="cell.y"
+        [attr.width]="cellSize - 2"
+        [attr.height]="cellSize - 2"
+        rx="2" ry="2"
+        [attr.class]="cell.cssClass">
+        <title>{{ cell.date.toLocaleDateString() }}: {{ cell.value ?? 0 }} hours</title>
+    </rect>
+    }
+</svg>

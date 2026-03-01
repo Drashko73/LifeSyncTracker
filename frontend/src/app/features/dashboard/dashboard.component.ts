@@ -7,7 +7,7 @@ import { ChartModule } from 'primeng/chart';
 import { ToastModule } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
-import { NgxHeatmapCalendar, HeatMapDate, HeatMapEvent } from 'ngx-heatmap-calendar';
+import { HeatmapCalendarComponent, HeatMapDate } from 'src/app/shared/components/heatmap-calendar/heatmap-calendar';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { TimeEntryService } from '../../core/services/time-entry.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
@@ -27,7 +27,7 @@ import { DashboardStats, TimeDistribution, MonthlyFlow, Currency, DailyProductiv
     ChartModule,
     ToastModule,
     ProgressSpinnerModule,
-    NgxHeatmapCalendar,
+    HeatmapCalendarComponent
   ],
   providers: [MessageService],
   templateUrl: './dashboard.component.html'
@@ -116,7 +116,7 @@ export class DashboardComponent implements OnInit {
   }
 
   /**
-   * Converts backend productivity data into HeatMapDate[] for ngx-heatmap-calendar.
+   * Converts backend productivity data into HeatMapDate[] for the heatmap calendar.
    * Uses intensityLevel (0-4) as the value and constructs dates without timezone offset.
    */
   private prepareHeatmapData(productivity: DailyProductivity[]): void {
