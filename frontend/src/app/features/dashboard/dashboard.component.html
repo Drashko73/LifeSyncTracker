@@ -163,8 +163,8 @@
                 <p-progressSpinner [style]="{width: '40px', height: '40px'}"></p-progressSpinner>
             </div>
         } @else if (heatmapDates().length > 0) {
-            <div class="flex flex-col items-center">
-            <div class="overflow-x-auto">
+            <div class="flex flex-col items-center max-w-full">
+            <div class="overflow-x-auto max-w-full">
             <app-heatmap-calendar
                 [startDate]="heatmapStartDate()"
                 [endDate]="heatmapEndDate()"
