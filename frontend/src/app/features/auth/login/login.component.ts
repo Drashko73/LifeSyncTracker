@@ -2,10 +2,8 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../core/services/auth.service';
@@ -20,10 +18,8 @@ import { AuthService } from '../../../core/services/auth.service';
     CommonModule,
     ReactiveFormsModule,
     RouterLink,
-    ButtonModule,
     InputTextModule,
     PasswordModule,
-    CardModule,
     ToastModule
   ],
   providers: [MessageService],

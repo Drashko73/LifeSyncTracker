@@ -47,6 +47,7 @@ builder.Services.AddScoped<ITagService, TagService>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<ITimeEntryService, TimeEntryService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IStatsService, StatsService>();
 
 // Add Controllers
 builder.Services.AddControllers();
