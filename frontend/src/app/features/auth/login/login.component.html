@@ -54,7 +54,7 @@
 
                 <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-8 space-y-6">
                     <div>
-                        <label for="usernameOrEmail" class="mb-2 block text-sm leading-5 font-medium">Email</label>
+                        <label for="usernameOrEmail" class="mb-2 block text-sm leading-5 font-medium">Username or Email</label>
                         <div class="relative">
                             <i class="pi pi-envelope absolute top-1/2 left-3 z-10 -translate-y-1/2 text-sm text-[#717182]"></i>
                             <input pInputText id="usernameOrEmail" formControlName="usernameOrEmail"
@@ -62,7 +62,7 @@
                                 placeholder="you@example.com" />
                         </div>
                         @if (loginForm.get('usernameOrEmail')?.invalid && loginForm.get('usernameOrEmail')?.touched) {
-                            <small class="mt-1 block text-sm text-red-600">Email is required</small>
+                            <small class="mt-1 block text-sm text-red-600">Username or Email is required</small>
                         }
                     </div>
 
