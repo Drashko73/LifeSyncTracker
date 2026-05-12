@@ -23,7 +23,8 @@ import { AuthService } from '../../../core/services/auth.service';
     ToastModule
   ],
   providers: [MessageService],
-  templateUrl: './login.component.html'
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.css'
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
