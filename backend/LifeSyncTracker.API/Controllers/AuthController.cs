@@ -5,6 +5,7 @@ using LifeSyncTracker.API.Services.Interfaces;
 using LifeSyncTracker.API.Models.DTOs.Auth.Response;
 using LifeSyncTracker.API.Models.DTOs.Auth.Request;
 using LifeSyncTracker.API.Models.DTOs.Common.Response;
+using LifeSyncTracker.API.Exceptions;
 
 namespace LifeSyncTracker.API.Controllers;
 
@@ -29,12 +30,59 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Sends an email verification code.
+    /// </summary>
+    /// <param name="dto">Verification code request data.</param>
+    /// <returns>Operation result.</returns>
+    [HttpPost("send-verification-code")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status429TooManyRequests)]
+    public async Task<ActionResult<ApiResponse<string>>> SendVerificationCode([FromBody] SendVerificationCodeDto dto)
+    {
+        try
+        {
+            await _authService.SendVerificationCodeAsync(dto);
+            return Ok(ApiResponse<string>.SuccessResponse("Verification code sent.", "Verification code sent."));
+        }
+        catch (TooManyRequestsException ex)
+        {
+            return StatusCode(StatusCodes.Status429TooManyRequests, ApiResponse<string>.ErrorResponse(ex.Message));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+        }
+    }
+
+    /// <summary>
+    /// Verifies an email verification code.
+    /// </summary>
+    /// <param name="dto">Code verification request data.</param>
+    /// <returns>Operation result.</returns>
+    [HttpPost("verify-code")]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<ApiResponse<string>>> VerifyCode([FromBody] VerifyCodeDto dto)
+    {
+        try
+        {
+            await _authService.VerifyCodeAsync(dto);
+            return Ok(ApiResponse<string>.SuccessResponse("Verification code is valid.", "Verification successful."));
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(ApiResponse<string>.ErrorResponse(ex.Message));
+        }
+    }
+
+    /// <summary>
     /// Registers a new user.
     /// </summary>
     /// <param name="dto">Registration data.</param>
     /// <returns>Authentication response with token.</returns>
     [HttpPost("register")]
-    [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ApiResponse<AuthResponseDto>), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Register([FromBody] RegisterDto dto)
     {
@@ -42,7 +90,7 @@ public class AuthController : ControllerBase
         {
             var deviceId = GetDeviceIdentifier();
             var result = await _authService.RegisterAsync(dto, deviceId);
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Registration successful."));
+            return StatusCode(StatusCodes.Status201Created, ApiResponse<AuthResponseDto>.SuccessResponse(result, "Registration successful."));
         }
         catch (InvalidOperationException ex)
         {

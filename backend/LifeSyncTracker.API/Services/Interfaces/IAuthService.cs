@@ -9,6 +9,18 @@ namespace LifeSyncTracker.API.Services.Interfaces;
 public interface IAuthService
 {
     /// <summary>
+    /// Sends a verification code to the requested email.
+    /// </summary>
+    /// <param name="dto">Verification request data.</param>
+    Task SendVerificationCodeAsync(SendVerificationCodeDto dto);
+
+    /// <summary>
+    /// Validates an email verification code.
+    /// </summary>
+    /// <param name="dto">Code verification data.</param>
+    Task VerifyCodeAsync(VerifyCodeDto dto);
+
+    /// <summary>
     /// Registers a new user.
     /// </summary>
     /// <param name="dto">Registration data.</param>
