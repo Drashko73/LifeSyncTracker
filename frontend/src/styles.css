@@ -427,9 +427,8 @@ body {
 .pref { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
 .pref:first-child { border-top: 0; }
 .pref > div:first-child { min-width: 0; flex: 1 1 16rem; }
-.pref b { display: block; font-weight: 500; }
-.pref span { display: block; font-size: 13px; color: var(--muted); }
-.pref .seg span { display: inline; font-size: inherit; color: inherit; }
+.pref > div:first-child > b { display: block; font-weight: 500; }
+.pref > div:first-child > span { display: block; font-size: 13px; color: var(--muted); }
 .pref-control { width: 16rem; }
 .card-foot { border-top: 1px solid var(--line); padding: 8px 12px; display: flex; justify-content: flex-end; }
 .row-muted td { opacity: 0.6; }
@@ -448,8 +447,8 @@ body {
 .cat-name { flex: 1; min-width: 0; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 @media (hover: hover) { .cat-row:hover .row-actions { opacity: 1; } }
 .toggle-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
-.toggle-row b { display: block; font-weight: 500; font-size: 13px; }
-.toggle-row span { display: block; font-size: 12px; color: var(--muted); }
+.toggle-row > div > b { display: block; font-weight: 500; font-size: 13px; }
+.toggle-row > div > span { display: block; font-size: 12px; color: var(--muted); }
 .icon-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(36px, 1fr)); gap: 4px; }
 .icon-grid button { height: 36px; border-radius: 7px; border: 1px solid transparent; background: var(--surface-2); color: var(--ink-2); cursor: pointer; transition: background-color 120ms ease, border-color 120ms ease, transform 120ms var(--ease-out); }
 .icon-grid button:active { transform: scale(0.95); }
