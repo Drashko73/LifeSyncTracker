@@ -18,7 +18,7 @@ export interface BarListRow {
   standalone: true,
   host: { class: 'bar-list' },
   template: `
-    @for (r of rows(); track r.name) {
+    @for (r of shown(); track r.name) {
       <div class="bl-row">
         <div class="bl-name">
           @if (r.icon) {
@@ -41,9 +41,18 @@ export class BarListComponent {
   rows = input.required<BarListRow[]>();
   format = input<(v: number) => string>(v => String(v));
   totalLabel = input('');
+  /** Max rows; the tail folds into one "Other" row. */
+  limit = input(6);
 
+  protected shown = computed<BarListRow[]>(() => {
+    const rows = [...this.rows()].sort((a, b) => b.value - a.value);
+    if (rows.length <= this.limit()) return rows;
+    const head = rows.slice(0, this.limit() - 1);
+    const rest = rows.slice(this.limit() - 1);
+    return [...head, { name: `${rest.length} more`, value: rest.reduce((s, r) => s + r.value, 0), color: 'var(--line-strong)', icon: head[0]?.icon ? 'pi-ellipsis-h' : undefined }];
+  });
   protected total = computed(() => this.rows().reduce((s, r) => s + r.value, 0));
-  protected max = computed(() => Math.max(0, ...this.rows().map(r => r.value)));
+  protected max = computed(() => Math.max(0, ...this.shown().map(r => r.value)));
 
   protected pct(v: number): string {
     const t = this.total();

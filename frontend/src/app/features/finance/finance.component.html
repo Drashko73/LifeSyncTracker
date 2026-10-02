@@ -1,298 +1,189 @@
-<div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
-    <p-toast></p-toast>
-    <p-confirmdialog></p-confirmdialog>
-
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+<div class="page">
+  <div class="page-head">
     <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Finance Tracking</h1>
-        <p class="text-gray-500 dark:text-gray-400">Track your income and expenses</p>
+      <h1>Finance</h1>
+      <p>Income, spending and where it goes.</p>
     </div>
-    <div class="mt-4 md:mt-0">
-        <p-button 
-        label="Add Transaction" 
-        icon="pi pi-plus" 
-        (onClick)="showAddTransactionDialog()"
-        ></p-button>
+    <div class="page-actions">
+      <p-button label="Add transaction" icon="pi pi-plus" (onClick)="openNew()" />
     </div>
+  </div>
+
+  <div class="filters">
+    <div class="seg" role="group" aria-label="Period">
+      @for (p of periods; track p.value) {
+        <button type="button" [attr.aria-pressed]="period() === p.value" (click)="setPeriod(p.value)">{{ p.label }}</button>
+      }
+    </div>
+    <p-datepicker [(ngModel)]="customRange" selectionMode="range" [readonlyInput]="true" dateFormat="d M yy"
+      [placeholder]="rangeLabel()" (onSelect)="onCustomRange()" appendTo="body" [showIcon]="true" iconDisplay="input"
+      styleClass="filter-range" inputStyleClass="filter-range-input" ariaLabel="Custom date range" />
+  </div>
+
+  @if (foreignCurrency(); as note) {
+    <div class="notice"><i class="pi pi-info-circle"></i><span>{{ note }}</span></div>
+  }
+
+  <div class="card kpis">
+    <app-stat-tile label="Income" [loading]="!kpis()" [value]="money(kpis()?.income ?? 0)"
+      [delta]="kpis()?.incomeDelta ?? null" [foot]="hasComparison() ? 'vs previous period' : rangeLabel()" />
+    <app-stat-tile label="Expenses" [loading]="!kpis()" [value]="money(kpis()?.expenses ?? 0)"
+      [delta]="kpis()?.expenseDelta ?? null" [goodWhenUp]="false" [foot]="hasComparison() ? 'vs previous period' : rangeLabel()" />
+    <app-stat-tile label="Net" [loading]="!kpis()" [value]="(kpis()?.net ?? 0) > 0 ? '+' + money(kpis()!.net) : money(kpis()?.net ?? 0)"
+      [valueClass]="(kpis()?.net ?? 0) >= 0 ? 'text-pos' : 'text-neg'" [foot]="money(kpis()?.perMonth ?? 0) + ' per month on average'" />
+    <app-stat-tile label="Savings rate" [loading]="!kpis()" [value]="kpis()?.rate !== null && kpis()?.rate !== undefined ? kpis()!.rate!.toFixed(1) : '—'"
+      [unit]="kpis()?.rate !== null ? '%' : ''" foot="Share of income kept" />
+  </div>
+
+  <div class="grid-main">
+    <div class="card">
+      <div class="card-h">
+        <div><h2>Monthly trend</h2><div class="sub">Last {{ trendMonths() }} months</div></div>
+        <div class="legend">
+          <span><i class="sw" style="background: var(--s1)"></i>Income</span>
+          <span><i class="sw" style="background: var(--s2)"></i>Expenses</span>
+          <span><i class="sw line" style="background: var(--ink)"></i>Net</span>
+        </div>
+      </div>
+      <div class="card-b">
+        @if (!chartData()) {
+          <p-skeleton height="240px" />
+        } @else if (!hasFlow()) {
+          <div class="empty"><i class="pi pi-chart-bar"></i><b>No transactions yet</b><p>Your monthly income and spending will show up here.</p></div>
+        } @else {
+          <div class="chart-box"><p-chart type="bar" [data]="chartData()" [options]="chartOptions()" height="260px" /></div>
+        }
+      </div>
     </div>
 
-    <!-- Summary Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-    <p-card styleClass="hover-card">
-        <div class="flex items-center justify-between">
-        <div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Total Income</p>
-            <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ formatCurrency(summary()?.totalIncome || 0, userPreferencesService.getCurrency()) }}</p>
-        </div>
-        <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/50">
-            <i class="pi pi-arrow-up text-2xl text-green-600 dark:text-green-400"></i>
-        </div>
-        </div>
-    </p-card>
-
-    <p-card styleClass="hover-card">
-        <div class="flex items-center justify-between">
-        <div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Total Expenses</p>
-            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ formatCurrency(summary()?.totalExpenses || 0, userPreferencesService.getCurrency()) }}</p>
-        </div>
-        <div class="p-3 rounded-full bg-red-100 dark:bg-red-900/50">
-            <i class="pi pi-arrow-down text-2xl text-red-600 dark:text-red-400"></i>
-        </div>
-        </div>
-    </p-card>
-
-    <p-card styleClass="hover-card">
-        <div class="flex items-center justify-between">
-        <div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Net Balance</p>
-            <p class="text-2xl font-bold" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'">
-            {{ formatCurrency(summary()?.netBalance || 0, userPreferencesService.getCurrency()) }}
-            </p>
-        </div>
-        <div class="p-3 rounded-full" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'bg-green-100 dark:bg-green-900/50' : 'bg-red-100 dark:bg-red-900/50'">
-            <i class="pi pi-wallet text-2xl" [ngClass]="(summary()?.netBalance || 0) >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'"></i>
-        </div>
-        </div>
-    </p-card>
+    <div class="card">
+      <div class="card-h"><div><h2>Spending by category</h2><div class="sub">{{ rangeLabel() }}</div></div></div>
+      <div class="card-b">
+        @if (rangeTransactions() === null) {
+          @for (i of [1, 2, 3, 4, 5]; track i) { <p-skeleton height="2.25rem" styleClass="mb-2" /> }
+        } @else if (categoryRows().length) {
+          <app-bar-list [rows]="categoryRows()" [format]="money" totalLabel="Total spent" />
+        } @else {
+          <div class="empty"><i class="pi pi-shopping-cart"></i><b>No spending in this period</b><p>Expenses you add will be grouped by category here.</p></div>
+        }
+      </div>
     </div>
+  </div>
 
-    <!-- Filters -->
-    <p-card class="mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Period</label>
-        <p-select 
-            [options]="userPreferencesService.getFilterPeriodOptions()" 
-            [(ngModel)]="filterPeriod" 
-            optionLabel="label" 
-            optionValue="value"
-            styleClass="w-full"
-            appendTo="body"
-            (onChange)="onFilterPeriodChange()"
-        ></p-select>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
-        <p-select 
-            [options]="transactionTypes" 
-            [(ngModel)]="filterType" 
-            optionLabel="label" 
-            optionValue="value"
-            placeholder="All Types"
-            [showClear]="true"
-            styleClass="w-full"
-            appendTo="body"
-            (onChange)="loadTransactions()"
-        ></p-select>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-        <p-select 
-            [options]="categories()" 
-            [(ngModel)]="filterCategoryId" 
-            optionLabel="name" 
-            optionValue="id"
-            placeholder="All Categories"
-            [showClear]="true"
-            styleClass="w-full"
-            appendTo="body"
-            (onChange)="loadTransactions()"
-        ></p-select>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-        <p-datepicker 
-            [(ngModel)]="filterStartDate" 
-            dateFormat="yy-mm-dd"
-            [showIcon]="true"
-            appendTo="body"
-            [touchUI]="isMobile"
-            styleClass="w-full"
-            (onSelect)="loadTransactions()"
-        ></p-datepicker>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-        <p-datepicker 
-            [(ngModel)]="filterEndDate" 
-            dateFormat="yy-mm-dd"
-            [showIcon]="true"
-            appendTo="body"
-            [touchUI]="isMobile"
-            styleClass="w-full"
-            (onSelect)="loadTransactions()"
-        ></p-datepicker>
-        </div>
-        <div class="flex items-end">
-        <p-button label="Clear" icon="pi pi-times" severity="secondary" (onClick)="clearFilters()"></p-button>
-        </div>
+  <div class="card overflow-hidden">
+    <div class="card-h table-toolbar">
+      <div class="seg" role="group" aria-label="Type">
+        @for (t of typeOptions; track t.label) {
+          <button type="button" [attr.aria-pressed]="filterType() === t.value" (click)="setType(t.value)">{{ t.label }}</button>
+        }
+      </div>
+      <p-select [options]="filterCategories()" [ngModel]="filterCategoryId()" (ngModelChange)="setCategory($event)" optionLabel="name" optionValue="id"
+        placeholder="All categories" [showClear]="true" [filter]="filterCategories().length > 8" appendTo="body" styleClass="filter-select" size="small">
+        <ng-template #item let-c><span class="opt"><span class="cat-ic sm" [style.background]="tint(c.colorCode)" [style.color]="c.colorCode"><i class="pi {{ c.icon || 'pi-tag' }}"></i></span>{{ c.name }}</span></ng-template>
+      </p-select>
     </div>
-    </p-card>
-
-    <!-- Transactions Table -->
-    <p-card>
-    <ng-template pTemplate="header">
-        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Transactions</h2>
-        </div>
-    </ng-template>
-    
-    @if (isLoading()) {
-        <div class="flex justify-center items-center h-32">
-        <p-progressSpinner></p-progressSpinner>
-        </div>
-    } @else {
-        <p-table 
-        [value]="transactions()" 
-        [paginator]="true" 
-        [lazy]="true"
-        [first]="first"
-        (onLazyLoad)="pageChange($event)"
-        [rows]="rows"
-        [rowsPerPageOptions]="[10, 25, 50]"
-        [showCurrentPageReport]="true"
-        [totalRecords]="totalRecords"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} transactions"
-        styleClass="p-datatable-sm"
-        >
-        <ng-template pTemplate="header">
-            <tr>
-            <th>Date</th>
-            <th>Category</th>
-            <th>Description</th>
-            <th>Amount</th>
-            <th>Actions</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-transaction>
-            <tr>
-            <td>{{ formatDate(transaction.date) }}</td>
-            <td>
-                <span 
-                class="px-2 py-1 rounded text-sm inline-flex items-center"
-                [style.backgroundColor]="transaction.category.colorCode || '#e5e7eb'"
-                [style.color]="getContrastColor(transaction.category.colorCode)"
-                >
-                @if (transaction.category.icon) {
-                    <i [class]="'pi ' + transaction.category.icon + ' mr-1'"></i>
-                }
-                {{ transaction.category.name }}
-                </span>
-            </td>
-            <td class="max-w-xs truncate">{{ transaction.description || '-' }}</td>
-            <td>
-                <span [class]="transaction.category.type === 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'" class="font-semibold">
-                {{ transaction.category.type === 0 ? '+' : '-' }}{{ formatCurrency(transaction.amount, transaction.currency) }}
-                </span>
-                @if (transaction.isAutoGenerated) {
-                <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">(auto)</span>
-                }
-            </td>
-            <td>
-                <div class="flex gap-2">
-                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" (onClick)="editTransaction(transaction)"></p-button>
-                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="confirmDelete(transaction)"></p-button>
-                </div>
-            </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-            <tr>
-            <td colspan="5" class="text-center py-8 text-gray-500 dark:text-gray-400">
-                No transactions found. Add your first transaction!
-            </td>
-            </tr>
-        </ng-template>
-        </p-table>
-    }
-    </p-card>
-
-    <!-- Add/Edit Transaction Dialog -->
-    <p-dialog 
-    [header]="editingTransaction ? 'Edit Transaction' : 'Add Transaction'" 
-    [(visible)]="showTransactionDialog" 
-    [modal]="true" 
-    [style]="{width: '450px'}"
-    [closable]="true"
-    [maximizable]="true"
-    >
-    <form [formGroup]="transactionForm">
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category *</label>
-        <p-select 
-            [options]="categories()" 
-            formControlName="categoryId" 
-            optionLabel="name" 
-            optionValue="id"
-            placeholder="Select a category"
-            appendTo="body"
-            class="w-full"
-        >
-            <ng-template let-category pTemplate="item">
-            <div class="flex items-center">
-                @if (category.icon) {
-                <i [class]="'pi ' + category.icon + ' mr-2'"></i>
-                }
-                <span>{{ category.name }}</span>
-                <span class="ml-2 text-xs text-gray-400 dark:text-gray-500">
-                ({{ category.type === 0 ? 'Income' : 'Expense' }})
-                </span>
+    <p-table [value]="transactions()" [lazy]="true" (onLazyLoad)="onPage($event)" [paginator]="totalRecords() > rows" [rows]="rows" [first]="first"
+      [totalRecords]="totalRecords()" [rowsPerPageOptions]="[20, 50, 100]" [loading]="isLoading()" [showLoader]="false" dataKey="id"
+      [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} of {totalRecords}">
+      <ng-template #header>
+        <tr>
+          <th class="hide-sm" style="width: 7rem">Date</th>
+          <th>Description</th>
+          <th class="hide-sm" style="width: 14rem">Category</th>
+          <th class="text-right" style="width: 10rem">Amount</th>
+          <th class="hide-sm" style="width: 5.5rem"><span class="sr-only">Actions</span></th>
+        </tr>
+      </ng-template>
+      <ng-template #body let-t>
+        <tr>
+          <td class="hide-sm num text-ink-2 whitespace-nowrap">{{ date(t.date) }}</td>
+          <td>
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="cat-ic" [style.background]="tint(t.category.colorCode)" [style.color]="t.category.colorCode"><i class="pi {{ t.category.icon || 'pi-tag' }}"></i></span>
+              <div class="desc min-w-0">
+                <b>{{ t.description || t.category.name }}
+                  @if (t.isAutoGenerated) { <span class="chip chip-accent ml-1 align-[1px]" title="Created automatically from a time entry">Auto</span> }
+                </b>
+                <span class="show-sm">{{ t.category.name }} · {{ date(t.date) }}</span>
+              </div>
             </div>
-            </ng-template>
-        </p-select>
-        </div>
-        <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount *</label>
-            <p-inputnumber 
-            formControlName="amount" 
-            [min]="0.01"
-            styleClass="w-full"
-            ></p-inputnumber>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Currency</label>
-            <p-select 
-            [options]="currencies" 
-            formControlName="currency" 
-            optionLabel="label" 
-            optionValue="value"
-            styleClass="w-full"
-            appendTo="body"
-            ></p-select>
-        </div>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date *</label>
-        <p-datepicker 
-            formControlName="date" 
-            dateFormat="yy-mm-dd"
-            [showIcon]="true"
-            appendTo="body"
-            [touchUI]="isMobile"
-            styleClass="w-full"
-        ></p-datepicker>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-        <input 
-            pInputText 
-            formControlName="description" 
-            class="w-full"
-            placeholder="Optional description"
-        />
-        </div>
-    </form>
-    <ng-template pTemplate="footer">
-        <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="showTransactionDialog = false"></p-button>
-        <p-button 
-        [label]="editingTransaction ? 'Update' : 'Save'" 
-        icon="pi pi-check" 
-        (onClick)="saveTransaction()"
-        [disabled]="transactionForm.invalid"
-        ></p-button>
-    </ng-template>
-    </p-dialog>
+          </td>
+          <td class="hide-sm text-ink-2">{{ t.category.name }}</td>
+          <td class="text-right whitespace-nowrap">
+            <span class="num font-medium" [class.text-pos]="t.category.type === Income">
+              @if (t.currency !== prefs.currency()) { <span class="cur">{{ currencyLabel(t.currency) }}</span> }{{ amount(t) }}
+            </span>
+          </td>
+          <td class="hide-sm text-right">
+            <span class="row-actions">
+              <p-button icon="pi pi-pencil" [text]="true" severity="secondary" size="small" ariaLabel="Edit transaction" (onClick)="edit(t)" />
+              <p-button icon="pi pi-trash" [text]="true" severity="danger" size="small" ariaLabel="Delete transaction" (onClick)="remove(t)" />
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #loadingbody>
+        @for (i of [1, 2, 3, 4, 5]; track i) { <tr><td colspan="5"><p-skeleton height="1.6rem" /></td></tr> }
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="5">
+            <div class="empty">
+              <i class="pi pi-wallet"></i>
+              <b>No transactions match</b>
+              <p>Try another period or filter, or add a transaction.</p>
+              <p-button label="Add transaction" icon="pi pi-plus" size="small" severity="secondary" (onClick)="openNew()" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </div>
+
+<p-dialog [header]="editing ? 'Edit transaction' : 'Add transaction'" [(visible)]="showDialog" [modal]="true" [draggable]="false"
+  [focusOnShow]="false" [dismissableMask]="true" [style]="{ width: '30rem' }">
+  <form [formGroup]="form" class="form-grid" (ngSubmit)="save()" id="tx-form">
+    <div class="seg seg-block" role="group" aria-label="Type">
+      <button type="button" [attr.aria-pressed]="formType() === Expense" (click)="setFormType(Expense)"><i class="pi pi-arrow-up-right"></i>Expense</button>
+      <button type="button" [attr.aria-pressed]="formType() === Income" (click)="setFormType(Income)"><i class="pi pi-arrow-down-left"></i>Income</button>
+    </div>
+
+    <div class="field">
+      <label for="tx-amount">Amount</label>
+      <div class="amount-group">
+        <p-inputnumber inputId="tx-amount" formControlName="amount" mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2" placeholder="0.00" styleClass="grow" />
+        <p-select formControlName="currency" [options]="currencies" optionLabel="label" optionValue="value" appendTo="body" ariaLabel="Currency" styleClass="w-24" />
+      </div>
+      @if (form.controls.amount.touched && form.controls.amount.invalid) { <span class="err">Enter an amount greater than zero.</span> }
+    </div>
+
+    <div class="field">
+      <label for="tx-category">Category</label>
+      <p-select inputId="tx-category" formControlName="categoryId" [options]="dialogCategories()" optionLabel="name" optionValue="id"
+        placeholder="Choose a category" appendTo="body" [filter]="dialogCategories().length > 8">
+        <ng-template #selectedItem let-c><span class="opt"><span class="cat-ic sm" [style.background]="tint(c.colorCode)" [style.color]="c.colorCode"><i class="pi {{ c.icon || 'pi-tag' }}"></i></span>{{ c.name }}</span></ng-template>
+        <ng-template #item let-c><span class="opt"><span class="cat-ic sm" [style.background]="tint(c.colorCode)" [style.color]="c.colorCode"><i class="pi {{ c.icon || 'pi-tag' }}"></i></span>{{ c.name }}</span></ng-template>
+      </p-select>
+      @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) { <span class="err">Choose a category.</span> }
+    </div>
+
+    <div class="field">
+      <label for="tx-date">Date</label>
+      <p-datepicker inputId="tx-date" formControlName="date" dateFormat="d M yy" appendTo="body" [showIcon]="true" iconDisplay="input" [showButtonBar]="true" />
+    </div>
+
+    <div class="field">
+      <label for="tx-desc">Description <span class="opt">optional</span></label>
+      <input pInputText id="tx-desc" formControlName="description" placeholder="e.g. Weekly groceries" />
+    </div>
+
+    @if (editing?.isAutoGenerated) {
+      <div class="notice"><i class="pi pi-info-circle"></i><span>This income was created from a time entry. Editing it here won't change the entry.</span></div>
+    }
+  </form>
+  <ng-template #footer>
+    <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showDialog = false" />
+    <p-button [label]="editing ? 'Save changes' : 'Add transaction'" type="submit" form="tx-form" [loading]="isSaving()" />
+  </ng-template>
+</p-dialog>

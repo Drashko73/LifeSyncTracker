@@ -17,8 +17,8 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { UserPreferencesService } from '../../core/services/user-preferences.service';
 import { DailyProductivity, DashboardStats, MonthlyFlow, TimeEntry, Transaction, TransactionType } from '../../core/models';
-import { currencyCode, formatDuration, formatHours, formatMoney, percentChange, tint } from '../../core/utils/format';
-import { baseChartOptions, chartColors } from '../../core/utils/chart-theme';
+import { formatDuration, formatHours, formatMoney, percentChange, tint } from '../../core/utils/format';
+import { cashFlowChart } from '../../core/utils/chart-theme';
 
 const DAY = 86_400_000;
 
@@ -233,36 +233,9 @@ export class DashboardComponent implements OnInit {
 
   private buildChart(flow: MonthlyFlow[]): void {
     if (!flow.length) return;
-    const c = chartColors();
-    const currency = this.prefs.currency();
-    const compact = new Intl.NumberFormat(undefined, { style: 'currency', currency: currencyCode(currency), notation: 'compact', maximumFractionDigits: 1 });
-    this.chartData.set({
-      labels: flow.map((f, i) => (i === 0 || f.month === 1 ? [f.label.split(' ')[0], f.year] : f.label.split(' ')[0])),
-      datasets: [
-        { type: 'line', label: 'Net', data: flow.map(f => f.income - f.expenses), borderColor: c.ink, backgroundColor: c.ink, borderWidth: 2,
-          pointRadius: flow.map((_, i) => (i === flow.length - 1 ? 4 : 2.5)), pointHoverRadius: 5, pointBackgroundColor: c.ink,
-          pointBorderColor: c.surface, pointBorderWidth: 2, tension: 0, order: 0 },
-        { type: 'bar', label: 'Income', data: flow.map(f => f.income), backgroundColor: c.s1, borderRadius: 4, borderSkipped: 'start',
-          barPercentage: 0.9, categoryPercentage: 0.62, order: 1 },
-        { type: 'bar', label: 'Expenses', data: flow.map(f => f.expenses), backgroundColor: c.s2, borderRadius: 4, borderSkipped: 'start',
-          barPercentage: 0.9, categoryPercentage: 0.62, order: 1 },
-      ],
-    });
-    const base = baseChartOptions(c, v => compact.format(v));
-    this.chartOptions.set({
-      ...base,
-      plugins: {
-        ...base.plugins,
-        tooltip: {
-          ...base.plugins.tooltip,
-          itemSort: (a: any, b: any) => a.datasetIndex === 0 ? 1 : b.datasetIndex === 0 ? -1 : a.datasetIndex - b.datasetIndex,
-          callbacks: {
-            title: (items: any[]) => flow[items[0].dataIndex].label,
-            label: (ctx: any) => ` ${ctx.dataset.label}: ${formatMoney(ctx.parsed.y, currency, { decimals: 0, sign: ctx.datasetIndex === 0 })}`,
-          },
-        },
-      },
-    });
+    const { data, options } = cashFlowChart(flow, this.prefs.currency());
+    this.chartData.set(data);
+    this.chartOptions.set(options);
   }
 
   private downloadChart(): void {

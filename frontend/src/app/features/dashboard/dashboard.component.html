@@ -61,7 +61,7 @@
           <div class="empty"><i class="pi pi-chart-bar"></i><b>No transactions yet</b><p>Add income and expenses to see your monthly cash flow.</p>
             <p-button label="Add transaction" size="small" severity="secondary" routerLink="/finance" [queryParams]="{ add: 1 }" /></div>
         } @else {
-          <div class="chart-box"><p-chart #flowChart type="bar" [data]="chartData()" [options]="chartOptions()" height="240px" /></div>
+          <div class="chart-box"><p-chart #flowChart type="bar" [data]="chartData()" [options]="chartOptions()" height="260px" /></div>
         }
       </div>
     </div>

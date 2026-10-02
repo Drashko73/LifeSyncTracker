@@ -1,4 +1,6 @@
 import { Chart } from 'chart.js';
+import { Currency, MonthlyFlow } from '../models';
+import { currencyCode, formatMoney } from './format';
 
 /**
  * Chart.js styling resolved from the CSS tokens in styles.css.
@@ -42,4 +44,43 @@ export function baseChartOptions(c: ChartColors, yTick: (v: number) => string) {
       },
     },
   };
+}
+
+/**
+ * Monthly cash flow: income/expense columns plus a net line, all on one money axis.
+ */
+export function cashFlowChart(flow: MonthlyFlow[], currency: Currency) {
+  const c = chartColors();
+  const compact = new Intl.NumberFormat(undefined, { style: 'currency', currency: currencyCode(currency), notation: 'compact', maximumFractionDigits: 1 });
+  const bar = { borderRadius: 4, borderSkipped: 'start' as const, barPercentage: 0.9, categoryPercentage: 0.62, order: 1 };
+  const data = {
+    labels: flow.map((f, i) => (i === 0 || f.month === 1 ? [f.label.split(' ')[0], String(f.year)] : f.label.split(' ')[0])),
+    datasets: [
+      {
+        type: 'line', label: 'Net', data: flow.map(f => f.income - f.expenses), borderColor: c.ink, backgroundColor: c.ink, borderWidth: 2,
+        pointRadius: flow.map((_, i) => (flow.length > 12 ? 0 : i === flow.length - 1 ? 4 : 2.5)), pointHoverRadius: 5,
+        pointBackgroundColor: c.ink, pointBorderColor: c.surface, pointBorderWidth: 2, order: 0,
+      },
+      { type: 'bar', label: 'Income', data: flow.map(f => f.income), backgroundColor: c.s1, ...bar },
+      { type: 'bar', label: 'Expenses', data: flow.map(f => f.expenses), backgroundColor: c.s2, ...bar },
+    ],
+  };
+  const base = baseChartOptions(c, v => compact.format(v));
+  const options = {
+    ...base,
+    plugins: {
+      ...base.plugins,
+      tooltip: {
+        ...base.plugins.tooltip,
+        // Net last, after the two bars.
+        itemSort: (a: { datasetIndex: number }, b: { datasetIndex: number }) => ((a.datasetIndex + 2) % 3) - ((b.datasetIndex + 2) % 3),
+        callbacks: {
+          title: (items: { dataIndex: number }[]) => flow[items[0].dataIndex].label,
+          label: (ctx: { dataset: { label?: string }; parsed: { y: number }; datasetIndex: number }) =>
+            ` ${ctx.dataset.label}: ${formatMoney(ctx.parsed.y, currency, { decimals: 0, sign: ctx.datasetIndex === 0 })}`,
+        },
+      },
+    },
+  };
+  return { data, options };
 }
