@@ -1,5 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { Currency } from '../models';
+import { formatMoney } from '../utils/format';
 
 /**
  * User preferences interface.
@@ -162,18 +163,8 @@ export class UserPreferencesService {
    * @param amount The numeric amount
    * @param currency Optional currency override
    */
-  formatCurrency(amount: number, currency?: Currency): string {
-    const curr = currency ?? this.currency();
-    switch (curr) {
-      case Currency.USD:
-        return `$${amount.toFixed(2)}`;
-      case Currency.EUR:
-        return `€${amount.toFixed(2)}`;
-      case Currency.RSD:
-        return `${amount.toFixed(2)} дин.`;
-      default:
-        return `$${amount.toFixed(2)}`;
-    }
+  formatCurrency(amount: number, currency?: Currency, opts?: { decimals?: 0 | 2; sign?: boolean }): string {
+    return formatMoney(amount, currency ?? this.currency(), opts);
   }
 
   /**
