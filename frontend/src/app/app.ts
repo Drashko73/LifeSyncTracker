@@ -1,47 +1,43 @@
 import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
-import { HeaderComponent } from './shared/components/header/header.component';
-import { FooterComponent } from './shared/components/footer/footer.component';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ShellComponent } from './shared/components/shell/shell.component';
 import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 
 /**
  * Root application component.
- * Shows header and footer for authenticated routes.
+ * Wraps authenticated routes in the app shell; hosts the single toast and confirm dialog.
  */
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HeaderComponent, FooterComponent],
+  imports: [RouterOutlet, ShellComponent, ToastModule, ConfirmDialogModule],
   template: `
-    <div class="flex flex-col min-h-screen">
-      @if (showHeader) {
-        <app-header></app-header>
-      }
-      <main class="flex-1">
-        <router-outlet></router-outlet>
-      </main>
-      @if (showHeader) {
-        <app-footer></app-footer>
-      }
-    </div>
+    @if (showShell) {
+      <app-shell><router-outlet /></app-shell>
+    } @else {
+      <router-outlet />
+    }
+    <p-toast position="top-right" />
+    <p-confirmdialog [style]="{ width: '26rem' }" />
   `,
 })
 export class App {
   private authService = inject(AuthService);
   private router = inject(Router);
   private themeService = inject(ThemeService); // Initialize theme service on app start
-  
-  showHeader = false;
+
+  showShell = false;
 
   constructor() {
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: NavigationEnd) => {
-      // Show header for all routes except auth routes
-      this.showHeader = !event.url.startsWith('/auth') && this.authService.isAuthenticated();
-    });
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd), takeUntilDestroyed())
+      .subscribe((event: NavigationEnd) => {
+        this.showShell = !event.urlAfterRedirects.startsWith('/auth') && this.authService.isAuthenticated();
+      });
   }
 }
