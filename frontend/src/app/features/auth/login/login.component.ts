@@ -1,13 +1,9 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { CardModule } from 'primeng/card';
-import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../core/services/auth.service';
 
 /**
@@ -16,66 +12,39 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    RouterLink,
-    ButtonModule,
-    InputTextModule,
-    PasswordModule,
-    CardModule,
-    ToastModule
-  ],
-  providers: [MessageService],
-  templateUrl: './login.component.html'
+  imports: [ReactiveFormsModule, RouterLink, ButtonModule, InputTextModule, PasswordModule],
+  templateUrl: './login.component.html',
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private messageService = inject(MessageService);
 
-  isLoading = false;
+  isLoading = signal(false);
+  error = signal('');
 
   loginForm = this.fb.group({
     usernameOrEmail: ['', Validators.required],
-    password: ['', Validators.required]
+    password: ['', Validators.required],
   });
 
-  /**
-   * Handles form submission for login.
-   */
   onSubmit(): void {
-    if (this.loginForm.invalid) return;
-
-    this.isLoading = true;
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
+      return;
+    }
+    this.isLoading.set(true);
+    this.error.set('');
     const { usernameOrEmail, password } = this.loginForm.value;
-
-    this.authService.login({ 
-      usernameOrEmail: usernameOrEmail!, 
-      password: password! 
-    }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.messageService.add({
-            severity: 'success',
-            summary: 'Success',
-            detail: 'Login successful!'
-          });
-          this.router.navigate(['/dashboard']);
-        }
+    this.authService.login({ usernameOrEmail: usernameOrEmail!, password: password! }).subscribe({
+      next: response => {
+        if (response.success) this.router.navigate(['/dashboard']);
+        this.isLoading.set(false);
       },
-      error: (error) => {
-        this.isLoading = false;
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: error.error?.message || 'Login failed. Please try again.'
-        });
+      error: error => {
+        this.isLoading.set(false);
+        this.error.set(error.error?.message || 'Sign-in failed. Check your details and try again.');
       },
-      complete: () => {
-        this.isLoading = false;
-      }
     });
   }
 }

@@ -1,211 +1,147 @@
-<div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
-    <p-toast></p-toast>
-    
-    <!-- Header -->
-    <div class="mb-6">
-    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Dashboard</h1>
-    <p class="text-gray-500 dark:text-gray-400">Welcome back! Here's your productivity overview.</p>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>{{ greeting() }}</h1>
+      <p>{{ today }}</p>
     </div>
-
-    @if (isLoading()) {
-    <div class="flex justify-center items-center h-64">
-        <p-progressSpinner></p-progressSpinner>
+    <div class="page-actions">
+      <p-button label="Transaction" icon="pi pi-plus" severity="secondary" routerLink="/finance" [queryParams]="{ add: 1 }" />
+      <p-button label="Log time" icon="pi pi-clock" routerLink="/time-tracking" />
     </div>
-    } @else {
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Weekly Hours -->
-        <p-card styleClass="hover-card">
-        <div class="flex items-center">
-            <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 mr-4">
-            <i class="pi pi-clock text-2xl text-blue-600 dark:text-blue-400"></i>
-            </div>
-            <div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Weekly Hours</p>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ stats()?.weeklyHours?.toFixed(1) || '0' }}</p>
-            </div>
-        </div>
-        </p-card>
+  </div>
 
-        <!-- Monthly Hours -->
-        <p-card styleClass="hover-card">
-        <div class="flex items-center">
-            <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/50 mr-4">
-            <i class="pi pi-calendar text-2xl text-green-600 dark:text-green-400"></i>
-            </div>
-            <div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Monthly Hours</p>
-            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ stats()?.monthlyHours?.toFixed(1) || '0' }}</p>
-            </div>
-        </div>
-        </p-card>
+  <div class="card kpis">
+    <app-stat-tile label="Hours this week" [loading]="isLoading()" [value]="formatHours(week().hours)" unit="h"
+      [spark]="week().spark" [delta]="week().delta" foot="vs same days last week" />
+    <app-stat-tile label="Hours this month" [loading]="isLoading()" [value]="formatHours(month().hours)" unit="h"
+      [foot]="month().activeDays + (month().activeDays === 1 ? ' active day in ' : ' active days in ') + month().name" />
+    <app-stat-tile label="Income this month" [loading]="isLoading()" [value]="money(stats()?.monthlyIncome ?? 0)"
+      [foot]="previousMonth() ? previousMonth()!.name + ' total ' + money(previousMonth()!.income) : ''" />
+    <app-stat-tile label="Spent this month" [loading]="isLoading()" [value]="money(stats()?.monthlyExpenses ?? 0)"
+      [foot]="previousMonth() ? previousMonth()!.name + ' total ' + money(previousMonth()!.expenses) : ''" />
+  </div>
 
-        <!-- Monthly Income -->
-        <p-card styleClass="hover-card">
-        <div class="flex items-center">
-            <div class="p-3 rounded-full bg-emerald-100 dark:bg-emerald-900/50 mr-4">
-            <i class="pi pi-dollar text-2xl text-emerald-600 dark:text-emerald-400"></i>
-            </div>
-            <div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Monthly Income</p>
-            <p class="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ formatCurrency(stats()?.monthlyIncome || 0, userPreferencesService.getCurrency()) }}</p>
-            </div>
-        </div>
-        </p-card>
-
-        <!-- Monthly Expenses -->
-        <p-card styleClass="hover-card">
-        <div class="flex items-center">
-            <div class="p-3 rounded-full bg-red-100 dark:bg-red-900/50 mr-4">
-            <i class="pi pi-shopping-cart text-2xl text-red-600 dark:text-red-400"></i>
-            </div>
-            <div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Monthly Expenses</p>
-            <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ formatCurrency(stats()?.monthlyExpenses || 0, userPreferencesService.getCurrency()) }}</p>
-            </div>
-        </div>
-        </p-card>
-    </div>
-
-    <!-- Running Timer Banner -->
-    @if (timeEntryService.runningTimer()) {
-        <div class="bg-linear-to-r from-blue-500 to-indigo-600 rounded-lg p-4 mb-6 text-white">
-        <div class="flex flex-col md:flex-row justify-between items-center">
-            <div class="flex items-center mb-4 md:mb-0">
-            <div class="animate-pulse mr-4">
-                <div class="w-3 h-3 bg-red-400 rounded-full"></div>
-            </div>
-            <div>
-                <p class="font-medium">Timer Running</p>
-                <p class="text-sm opacity-80">
-                {{ timeEntryService.runningTimer()?.project?.name || 'No project' }}
-                </p>
-            </div>
-            </div>
-            <div class="flex items-center">
-            <span class="timer-display mr-4">
-                {{ timeEntryService.formatElapsedTime(timeEntryService.elapsedSeconds()) }}
-            </span>
-            <a routerLink="/time-tracking" class="bg-white text-blue-600 px-4 py-2 rounded-lg font-medium hover:bg-blue-50 transition">
-                View Timer
-            </a>
-            </div>
-        </div>
-        </div>
-    }
-
-    <!-- Charts Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <!-- Time Distribution Pie Chart -->
-        <p-card>
-        <ng-template pTemplate="header">
-            <div class="p-4 border-b dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Time Distribution (This Month)</h2>
-            </div>
-        </ng-template>
-        <div class="p-4">
-            @if (pieChartData()) {
-            <div class="flex flex-col items-center">
-                <p-chart type="pie" [data]="pieChartData()" [options]="pieChartOptions"></p-chart>
-                <p-button label="Download Chart" icon="pi pi-download" class="mt-6" (click)="downloadChart('pie')"></p-button>
-            </div>
-            } @else {
-            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                <i class="pi pi-chart-pie text-4xl mb-2"></i>
-                <p>No time data available</p>
-            </div>
+  @if (timer.runningTimer(); as running) {
+    <div class="card timer-strip">
+      <div class="what">
+        <span class="dot-live"></span>
+        <div class="min-w-0">
+          <b>{{ running.description || 'Timer running' }}</b>
+          <span>
+            @if (running.project) {
+              <span class="pdot mr-1.5" [style.background]="running.project.colorCode || 'var(--muted)'" style="width:7px;height:7px"></span>{{ running.project.name }} ·
             }
+            started {{ startedAt() }}
+          </span>
         </div>
-        </p-card>
-
-        <!-- Monthly Flow Bar Chart -->
-        <p-card>
-        <ng-template pTemplate="header">
-            <div class="p-4 border-b dark:border-gray-700">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Income vs Expenses (6 Months)</h2>
-            </div>
-        </ng-template>
-        <div class="p-4">
-            @if (barChartData()) {
-            <p-chart type="bar" [data]="barChartData()" [options]="barChartOptions"></p-chart>
-            <div class="flex flex-col items-center">
-                <p-button label="Download Chart" icon="pi pi-download" class="mt-6" (click)="downloadChart('bar')"></p-button>
-            </div>
-            } @else {
-            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                <i class="pi pi-chart-bar text-4xl mb-2"></i>
-                <p>No financial data available</p>
-            </div>
-            }
-        </div>
-        </p-card>
+      </div>
+      <span class="clock num">{{ timer.formatElapsedTime(timer.elapsedSeconds()) }}</span>
+      <p-button label="Stop" icon="pi pi-stop" severity="contrast" (onClick)="stopTimer()" />
     </div>
+  }
 
-    <!-- Productivity Heatmap -->
-    <p-card>
-        <ng-template pTemplate="header">
-        <div class="p-4 border-b dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Productivity Heatmap</h2>
-            <p-select
-              [options]="yearOptions()"
-              [ngModel]="selectedYear()"
-              (ngModelChange)="onHeatmapYearChange($event)"
-              optionLabel="label"
-              optionValue="value"
-              appendTo="body"
-              styleClass="w-36"
-            ></p-select>
+  <div class="grid-main">
+    <div class="card">
+      <div class="card-h">
+        <div><h2>Cash flow</h2><div class="sub">Last 12 months</div></div>
+        <div class="flex items-center gap-3">
+          <div class="legend">
+            <span><i class="sw" style="background: var(--s1)"></i>Income</span>
+            <span><i class="sw" style="background: var(--s2)"></i>Expenses</span>
+            <span><i class="sw line" style="background: var(--ink)"></i>Net</span>
+          </div>
+          <p-button icon="pi pi-ellipsis-h" [text]="true" severity="secondary" size="small" ariaLabel="Chart options" (onClick)="chartMenu_.toggle($event)" />
+          <p-menu #chartMenu_ [popup]="true" [model]="chartMenu" appendTo="body" />
         </div>
-        </ng-template>
-        <div class="p-4">
-        @if (heatmapLoading()) {
-            <div class="flex justify-center items-center py-8">
-                <p-progressSpinner [style]="{width: '40px', height: '40px'}"></p-progressSpinner>
-            </div>
-        } @else if (heatmapDates().length > 0) {
-            <div class="flex flex-col items-center max-w-full">
-            <div class="overflow-x-auto max-w-full">
-            <app-heatmap-calendar
-                [startDate]="heatmapStartDate()"
-                [endDate]="heatmapEndDate()"
-                [dates]="heatmapDates()"
-                [classForValue]="heatmapClassForValue"
-                [showMonthLabel]="true"
-                [showDayLabel]="true"
-            ></app-heatmap-calendar>
-            </div>
-            <div class="flex items-center mt-4 text-sm text-gray-500 dark:text-gray-400">
-                <span class="mr-2">Less</span>
-                <div class="flex gap-1">
-                <div class="w-3 h-3 rounded-sm heatmap-0"></div>
-                <div class="w-3 h-3 rounded-sm heatmap-1"></div>
-                <div class="w-3 h-3 rounded-sm heatmap-2"></div>
-                <div class="w-3 h-3 rounded-sm heatmap-3"></div>
-                <div class="w-3 h-3 rounded-sm heatmap-4"></div>
-                </div>
-                <span class="ml-2">More</span>
-            </div>
-            </div>
+      </div>
+      <div class="card-b">
+        @if (!chartData()) {
+          <p-skeleton height="240px" />
+        } @else if (!hasFlow()) {
+          <div class="empty"><i class="pi pi-chart-bar"></i><b>No transactions yet</b><p>Add income and expenses to see your monthly cash flow.</p>
+            <p-button label="Add transaction" size="small" severity="secondary" routerLink="/finance" [queryParams]="{ add: 1 }" /></div>
         } @else {
-            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-            <i class="pi pi-th-large text-4xl mb-2"></i>
-            <p>No productivity data available</p>
-            </div>
+          <div class="chart-box"><p-chart #flowChart type="bar" [data]="chartData()" [options]="chartOptions()" height="260px" /></div>
         }
-        </div>
-    </p-card>
-
-    <!-- Quick Actions -->
-    <div class="mt-6 flex flex-wrap gap-4">
-        <a routerLink="/time-tracking">
-        <p-button label="Track Time" icon="pi pi-clock" severity="primary"></p-button>
-        </a>
-        <a routerLink="/finance">
-        <p-button label="Add Transaction" icon="pi pi-dollar" severity="success"></p-button>
-        </a>
-        <a routerLink="/settings">
-        <p-button label="Manage Settings" icon="pi pi-cog" severity="info"></p-button>
-        </a>
+      </div>
     </div>
-    }
+
+    <div class="card">
+      <div class="card-h"><div><h2>Time by project</h2><div class="sub">{{ month().name }}</div></div></div>
+      <div class="card-b">
+        @if (isLoading()) {
+          @for (i of [1, 2, 3, 4]; track i) { <p-skeleton height="2.25rem" styleClass="mb-2" /> }
+        } @else if (projectRows().length) {
+          <app-bar-list [rows]="projectRows()" [format]="formatHoursLabel" totalLabel="Total" />
+        } @else {
+          <div class="empty"><i class="pi pi-clock"></i><b>No time tracked this month</b><p>Start a timer or add an entry to see where your hours go.</p>
+            <p-button label="Track time" size="small" severity="secondary" routerLink="/time-tracking" /></div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <div><h2>Activity</h2><div class="sub">Hours tracked per day</div></div>
+      <p-select [options]="yearOptions()" [ngModel]="selectedYear()" (ngModelChange)="onYearChange($event)"
+        optionLabel="label" optionValue="value" appendTo="body" size="small" styleClass="w-40" />
+    </div>
+    <div class="card-b">
+      @if (isLoading() || heatmapLoading()) {
+        <p-skeleton height="150px" />
+      } @else {
+        <div class="hm-stats">
+          <div><div class="k">Total tracked</div><div class="v num">{{ heatmapSummary().total.toFixed(0) }} h</div></div>
+          <div><div class="k">Active days</div><div class="v num">{{ heatmapSummary().active }}<small>of {{ heatmapSummary().count }}</small></div></div>
+          <div><div class="k">Longest streak</div><div class="v num">{{ heatmapSummary().longest }} {{ heatmapSummary().longest === 1 ? 'day' : 'days' }}</div></div>
+          <div><div class="k">Best day</div>
+            <div class="v num">
+              @if (heatmapSummary().best; as b) { {{ formatDuration(b.hours * 60) }}<small>{{ shortDate(b.date) }}</small> } @else { – }
+            </div>
+          </div>
+        </div>
+        <app-heatmap-calendar [days]="heatmapDays()" />
+      }
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-h"><h2>Recent time</h2><a class="link" routerLink="/time-tracking">View all</a></div>
+      <div class="card-b">
+        @if (recentEntries() === null) {
+          @for (i of [1, 2, 3]; track i) { <p-skeleton height="2.5rem" styleClass="mb-2" /> }
+        } @else {
+          @for (e of recentEntries(); track e.id) {
+            <div class="li">
+              <span class="pdot" [style.background]="e.project?.colorCode || 'var(--muted)'"></span>
+              <div class="t"><b>{{ e.description || 'No description' }}</b><span>{{ e.project?.name || 'No project' }} · {{ shortDate(e.startTime) }}</span></div>
+              <span class="r num">{{ formatDuration(e.durationMinutes ?? 0) }}</span>
+            </div>
+          } @empty {
+            <div class="empty"><i class="pi pi-clock"></i><b>No entries yet</b><p>Your latest time entries will show up here.</p></div>
+          }
+        }
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><h2>Recent transactions</h2><a class="link" routerLink="/finance">View all</a></div>
+      <div class="card-b">
+        @if (recentTransactions() === null) {
+          @for (i of [1, 2, 3]; track i) { <p-skeleton height="2.5rem" styleClass="mb-2" /> }
+        } @else {
+          @for (t of recentTransactions(); track t.id) {
+            <div class="li">
+              <span class="cat-ic" [style.background]="tint(t.category.colorCode)" [style.color]="t.category.colorCode"><i class="pi {{ t.category.icon || 'pi-tag' }}"></i></span>
+              <div class="t"><b>{{ t.description || t.category.name }}</b><span>{{ t.category.name }} · {{ shortDate(t.date) }}</span></div>
+              <span class="r num" [class.text-pos]="t.category.type === Income">{{ txAmount(t) }}</span>
+            </div>
+          } @empty {
+            <div class="empty"><i class="pi pi-wallet"></i><b>No transactions yet</b><p>Income and expenses you add will show up here.</p></div>
+          }
+        }
+      </div>
+    </div>
+  </div>
 </div>

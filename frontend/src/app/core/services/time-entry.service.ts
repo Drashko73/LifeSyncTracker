@@ -112,7 +112,8 @@ export class TimeEntryService {
     if (filter.endDate) params = params.set('endDate', filter.endDate.toISOString());
     if (filter.page) params = params.set('page', filter.page.toString());
     if (filter.pageSize) params = params.set('pageSize', filter.pageSize.toString());
-    
+    filter.tagIds?.forEach(id => (params = params.append('tagIds', id.toString())));
+
     return this.http.get<ApiResponse<PaginatedResponse<TimeEntry>>>(this.apiUrl, { params });
   }
 

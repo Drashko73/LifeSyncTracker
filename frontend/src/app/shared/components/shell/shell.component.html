@@ -1,0 +1,84 @@
+<div class="shell" [class.collapsed]="collapsed()">
+  <aside class="sidebar" aria-label="Main navigation">
+    <a routerLink="/dashboard" class="brand">
+      <span class="brand-mark"><i class="pi pi-sync"></i></span>
+      <span class="rail-hide">LifeSync</span>
+    </a>
+
+    @for (item of nav; track item.path) {
+      <a class="nav-item" [routerLink]="item.path" routerLinkActive="active"
+         [pTooltip]="collapsed() ? item.label : ''" tooltipPosition="right">
+        <i class="pi {{ item.icon }}"></i>
+        <span class="rail-hide">{{ item.label }}</span>
+        @if (item.path === '/time-tracking' && timer.isTimerRunning()) {
+          <span class="nav-badge rail-hide num"><span class="dot-live"></span>{{ shortElapsed() }}</span>
+        }
+      </a>
+    }
+
+    <div class="nav-label rail-hide">Account</div>
+    <a class="nav-item" routerLink="/settings" routerLinkActive="active"
+       [pTooltip]="collapsed() ? 'Settings' : ''" tooltipPosition="right">
+      <i class="pi pi-sliders-h"></i><span class="rail-hide">Settings</span>
+    </a>
+
+    <div class="side-foot">
+      <button type="button" class="nav-item" (click)="toggleCollapsed()"
+              [attr.aria-label]="collapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+              [pTooltip]="collapsed() ? 'Expand' : ''" tooltipPosition="right">
+        <i class="pi" [class.pi-angle-double-left]="!collapsed()" [class.pi-angle-double-right]="collapsed()"></i>
+        <span class="rail-hide">Collapse</span>
+      </button>
+      <button type="button" class="user" (click)="sideMenu.toggle($event)" aria-label="Account menu">
+        <span class="avatar">{{ initial() }}</span>
+        <span class="user-meta rail-hide">
+          <b>{{ auth.currentUser()?.username }}</b>
+          <span>{{ auth.currentUser()?.email }}</span>
+        </span>
+        <i class="pi pi-ellipsis-v rail-hide"></i>
+      </button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <a routerLink="/dashboard" class="brand show-sm" aria-label="LifeSync home">
+        <span class="brand-mark"><i class="pi pi-sync"></i></span>
+      </a>
+      <div class="crumb hide-sm">
+        <span>LifeSync</span><i class="pi pi-angle-right"></i><b>{{ pageTitle() }}</b>
+      </div>
+      <b class="crumb-sm show-sm">{{ pageTitle() }}</b>
+      <span class="grow"></span>
+
+      @if (timer.isTimerRunning()) {
+        <a routerLink="/time-tracking" class="timer-pill" aria-label="Timer running, open Time">
+          <span class="dot-live"></span>
+          <span class="clock">{{ timer.formatElapsedTime(timer.elapsedSeconds()) }}</span>
+        </a>
+      }
+
+      <div class="seg icons hide-sm" role="group" aria-label="Theme">
+        @for (t of themeOptions; track t.value) {
+          <button type="button" [attr.aria-pressed]="theme.themeMode() === t.value" [attr.aria-label]="t.label"
+                  [pTooltip]="t.label" tooltipPosition="bottom" [showDelay]="400" (click)="theme.setThemeMode(t.value)">
+            <i class="pi {{ t.icon }}"></i>
+          </button>
+        }
+      </div>
+      <button type="button" class="avatar show-sm" (click)="menu.toggle($event)" aria-label="Account menu">{{ initial() }}</button>
+    </header>
+
+    <ng-content />
+  </div>
+
+  <nav class="tabbar" aria-label="Main navigation">
+    @for (item of nav; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="active"><i class="pi {{ item.icon }}"></i>{{ item.short }}</a>
+    }
+    <a routerLink="/settings" routerLinkActive="active"><i class="pi pi-sliders-h"></i>Settings</a>
+  </nav>
+</div>
+
+<p-menu #menu [popup]="true" [model]="menuItems" appendTo="body" (onHide)="onMenuHide()" />
+<p-menu #sideMenu [popup]="true" [model]="menuItems" appendTo="body" styleClass="side-menu" (onHide)="onMenuHide()" />
