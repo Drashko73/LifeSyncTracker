@@ -55,6 +55,20 @@ export function tint(color: string | undefined, pct = 14): string {
   return `color-mix(in oklab, ${color || 'var(--muted)'} ${pct}%, transparent)`;
 }
 
+/** "1 Apr – 2 Oct 2026" (year shown once when both dates share it). */
+export function formatRange(start: Date, end: Date): string {
+  const sameYear = start.getFullYear() === end.getFullYear();
+  const a = start.toLocaleDateString(undefined, { day: 'numeric', month: 'short', ...(sameYear ? {} : { year: 'numeric' }) });
+  const b = end.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  return `${a} – ${b}`;
+}
+
+/** Local calendar-day key, e.g. "2026-10-02". */
+export function dayKey(d: Date | string): string {
+  const x = new Date(d);
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+}
+
 /** Percent change, or null when there is no baseline. */
 export function percentChange(current: number, previous: number): number | null {
   return previous ? ((current - previous) / previous) * 100 : null;

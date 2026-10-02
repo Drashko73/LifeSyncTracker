@@ -33,6 +33,7 @@ export const appConfig: ApplicationConfig = {
     MessageService,
     ConfirmationService,
     providePrimeNG({
+      translation: { firstDayOfWeek: 1 },
       theme: {
         preset: LifeSyncPreset,
         options: {

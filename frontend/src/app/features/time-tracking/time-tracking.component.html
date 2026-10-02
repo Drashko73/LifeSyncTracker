@@ -1,401 +1,288 @@
-<div class="p-4 md:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors">
-    <p-toast></p-toast>
-    <p-confirmdialog></p-confirmdialog>
-
-    <!-- Header -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+<div class="page">
+  <div class="page-head">
     <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100">Time Tracking</h1>
-        <p class="text-gray-500 dark:text-gray-400">Track your work sessions and manage time entries</p>
+      <h1>Time</h1>
+      <p>Track work, review entries and export monthly reports.</p>
     </div>
-    <div class="mt-4 md:mt-0">
-        <p-button 
-        label="Add Manual Entry" 
-        icon="pi pi-plus" 
-        (onClick)="showManualEntryDialog()"
-        ></p-button>
+    <div class="page-actions">
+      <p-button label="Reports" icon="pi pi-file" severity="secondary" (onClick)="openReports()" />
+      <p-button label="Add entry" icon="pi pi-plus" severity="secondary" (onClick)="openNewEntry()" />
     </div>
-    </div>
+  </div>
 
-    <!-- Timer Card -->
-    <p-card class="mb-6" [class]="timeEntryService.isTimerRunning() ? 'ring-2 ring-blue-500' : ''">
-    <div class="flex flex-col md:flex-row justify-between items-center">
-        <div class="mb-4 md:mb-0">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">Timer</h2>
-        @if (timeEntryService.isTimerRunning()) {
-            <p class="text-gray-500 dark:text-gray-400">
-            Project: {{ timeEntryService.runningTimer()?.project?.name || 'No project selected' }}
-            </p>
-        }
-        </div>
-        
-        <div class="flex items-center space-x-4">
-        <span class="timer-display text-4xl font-mono dark:text-gray-100" [ngClass]="{'text-blue-600 dark:text-blue-400': timeEntryService.isTimerRunning()}">
-            {{ timeEntryService.formatElapsedTime(timeEntryService.elapsedSeconds()) }}
-        </span>
-        
-        @if (!timeEntryService.isTimerRunning()) {
-            <p-button 
-            label="Start" 
-            icon="pi pi-play" 
-            severity="success" 
-            size="large"
-            (onClick)="startTimer()"
-            ></p-button>
-        } @else {
-            <p-button 
-            label="Stop" 
-            icon="pi pi-stop" 
-            severity="danger" 
-            size="large"
-            (onClick)="showStopTimerDialog()"
-            ></p-button>
-        }
-        </div>
-    </div>
-    </p-card>
-
-    <!-- Filters -->
-    <p-card class="mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Time Period</label>
-        <p-select 
-            [options]="userPreferencesService.getFilterPeriodOptions()" 
-            [(ngModel)]="filterPeriod" 
-            optionLabel="label" 
-            optionValue="value"
-            appendTo="body"
-            styleClass="w-full"
-            (onChange)="onFilterPeriodChange()"
-        ></p-select>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
-        <p-select 
-            [options]="projects()" 
-            [(ngModel)]="filterProjectId" 
-            optionLabel="name" 
-            optionValue="id"
-            placeholder="All Projects"
-            [showClear]="true"
-            appendTo="body"
-            styleClass="w-full"
-            (onChange)="loadTimeEntries()"
-        ></p-select>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
-        <p-datepicker 
-            [(ngModel)]="filterStartDate" 
-            dateFormat="yy-mm-dd"
-            [showIcon]="true"
-            appendTo="body"
-            [touchUI]="isMobile"
-            styleClass="w-full"
-            (onSelect)="loadTimeEntries()"
-        ></p-datepicker>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Date</label>
-        <p-datepicker 
-            [(ngModel)]="filterEndDate" 
-            dateFormat="yy-mm-dd"
-            [showIcon]="true"
-            appendTo="body"
-            [touchUI]="isMobile"
-            styleClass="w-full"
-            (onSelect)="loadTimeEntries()"
-        ></p-datepicker>
-        </div>
-        <div class="flex items-end">
-        <p-button label="Clear Filters" icon="pi pi-times" severity="secondary" (onClick)="clearFilters()"></p-button>
-        </div>
-    </div>
-    </p-card>
-
-    <!-- Time Entries Table -->
-    <p-card>
-    <ng-template pTemplate="header">
-        <div class="p-4 border-b dark:border-gray-700 flex justify-between items-center">
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Time Entries</h2>
-        <p-button
-            label="PDF Report"
-            icon="pi pi-file-pdf"
-            severity="help"
-            [outlined]="true"
-            size="small"
-            (onClick)="showPdfReportDialog()"
-        ></p-button>
-        </div>
-    </ng-template>
-    
-    @if (isLoading()) {
-        <div class="flex justify-center items-center h-32">
-        <p-progressSpinner></p-progressSpinner>
-        </div>
+  <!-- Timer -->
+  <div class="card timer-hero" [class.running]="timer.isTimerRunning()">
+    @if (timer.runningTimer(); as running) {
+      <div class="th-project">
+        <span class="pdot" [style.background]="running.project?.colorCode || 'var(--muted)'"></span>
+        <span>{{ running.project?.name || 'No project' }}</span>
+      </div>
+      <input pInputText class="th-input" [(ngModel)]="draftDescription" placeholder="What are you working on?" aria-label="Description, saved when you stop" />
+      <span class="clock th-clock">{{ timer.formatElapsedTime(timer.elapsedSeconds()) }}</span>
+      <p-button label="Stop" icon="pi pi-stop" severity="contrast" (onClick)="openStopDialog()" />
     } @else {
-        <p-table 
-        [value]="timeEntries()" 
-        [paginator]="true" 
-        [lazy]="true"
-        [first]="first"
-        (onLazyLoad)="pageChange($event)"
-        [rows]="rows"
-        [rowsPerPageOptions]="[10, 25, 50]"
-        [showCurrentPageReport]="true"
-        [totalRecords]="totalRecords"
-        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        styleClass="p-datatable-sm"
-        >
-        <ng-template pTemplate="header">
-            <tr>
-            <th>Date</th>
-            <th>Project</th>
-            <th>Duration</th>
-            <th>Description</th>
-            <th>Actions</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-entry>
-            <tr>
-            <td>{{ formatDateTime(entry.startTime) }}</td>
-            <td>
-                @if (entry.project) {
-                <span 
-                    class="px-2 py-1 rounded text-sm"
-                    [style.backgroundColor]="entry.project.colorCode || '#e5e7eb'"
-                    [style.color]="getContrastColor(entry.project.colorCode)"
-                >
-                    {{ entry.project.name }}
-                </span>
-                } @else {
-                <span class="text-gray-400 dark:text-gray-500">No project</span>
-                }
-            </td>
-            <td>{{ formatDuration(entry.durationMinutes) }}</td>
-            <td class="max-w-xs truncate">{{ entry.description || '-' }}</td>
-            <td>
-                <div class="flex gap-2">
-                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" (onClick)="editTimeEntry(entry)"></p-button>
-                <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="confirmDelete(entry)"></p-button>
-                </div>
-            </td>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="emptymessage">
-            <tr>
-            <td colspan="5" class="text-center py-8 text-gray-500 dark:text-gray-400">
-                No time entries found. Start tracking your time!
-            </td>
-            </tr>
-        </ng-template>
-        </p-table>
+      <p-select [options]="projects()" [(ngModel)]="startProjectId" optionLabel="name" optionValue="id"
+        placeholder="No project" [showClear]="true" appendTo="body" styleClass="th-select" ariaLabel="Project">
+        <ng-template #selectedItem let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+        <ng-template #item let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+      </p-select>
+      <input pInputText class="th-input" [(ngModel)]="draftDescription" placeholder="What are you working on?" aria-label="Description" (keydown.enter)="startTimer()" />
+      <span class="clock th-clock idle">0:00:00</span>
+      <p-button label="Start" icon="pi pi-play" [loading]="isStarting()" (onClick)="startTimer()" />
     }
-    </p-card>
+  </div>
 
-    <!-- Stop Timer Dialog -->
-    <p-dialog 
-    header="Stop Timer" 
-    [(visible)]="showStopDialog" 
-    [modal]="true" 
-    [style]="{width: '500px', 'max-width': '95vw'}"
-    [closable]="true"
-    [maximizable]="true"
-    >
-    <form [formGroup]="stopTimerForm">
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
-        <p-select 
-            [options]="projects()" 
-            formControlName="projectId" 
-            optionLabel="name" 
-            optionValue="id"
-            placeholder="Select a project"
-            [showClear]="true"
-            appendTo="body"
-            styleClass="w-full"
-        ></p-select>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">What have I done?</label>
-        <textarea 
-            pTextarea 
-            formControlName="description" 
-            rows="3" 
-            class="w-full"
-            placeholder="Describe what you worked on..."
-        ></textarea>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">What should be done next?</label>
-        <textarea 
-            pTextarea 
-            formControlName="nextSteps" 
-            rows="3" 
-            class="w-full"
-            placeholder="Handover notes for next session..."
-        ></textarea>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
-        <p-multiselect 
-            [options]="tags()" 
-            formControlName="tagIds" 
-            optionLabel="name" 
-            optionValue="id"
-            placeholder="Select tags"
-            styleClass="w-full"
-        ></p-multiselect>
-        </div>
-    </form>
-    <ng-template pTemplate="footer">
-        <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="showStopDialog = false"></p-button>
-        <p-button label="Save & Stop" icon="pi pi-check" (onClick)="stopTimer()"></p-button>
-    </ng-template>
-    </p-dialog>
-
-    <!-- Manual Entry Dialog -->
-    <p-dialog 
-    [header]="editingEntry ? 'Edit Time Entry' : 'Add Manual Entry'" 
-    [(visible)]="showManualDialog" 
-    [modal]="true" 
-    [style]="{width: '500px', 'max-width': '95vw'}"
-    [closable]="true"
-    [maximizable]="true"
-    >
-    <form [formGroup]="manualEntryForm">
-        <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
-            <p-datepicker 
-            formControlName="startTime" 
-            [showTime]="true" 
-            [showIcon]="true"
-            dateFormat="yy-mm-dd"
-            appendTo="body"
-            [touchUI]="isMobile"
-            styleClass="w-full"
-            ></p-datepicker>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
-            <p-datepicker 
-            formControlName="endTime" 
-            [showTime]="true" 
-            [showIcon]="true"
-            dateFormat="yy-mm-dd"
-            appendTo="body"
-            [touchUI]="isMobile"
-            styleClass="w-full"
-            ></p-datepicker>
-        </div>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
-        <p-select 
-            [options]="projects()" 
-            formControlName="projectId" 
-            optionLabel="name" 
-            optionValue="id"
-            placeholder="Select a project"
-            [showClear]="true"
-            appendTo="body"
-            styleClass="w-full"
-        ></p-select>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-        <textarea 
-            pTextarea 
-            formControlName="description" 
-            rows="3" 
-            class="w-full"
-            placeholder="What did you work on?"
-        ></textarea>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Next Steps</label>
-        <textarea 
-            pTextarea 
-            formControlName="nextSteps" 
-            rows="3" 
-            class="w-full"
-            placeholder="Handover notes..."
-        ></textarea>
-        </div>
-        <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Tags</label>
-        <p-multiselect 
-            [options]="tags()" 
-            formControlName="tagIds" 
-            optionLabel="name" 
-            optionValue="id"
-            placeholder="Select tags"
-            styleClass="w-full"
-        ></p-multiselect>
-        </div>
-    </form>
-    <ng-template pTemplate="footer">
-        <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="showManualDialog = false"></p-button>
-        <p-button [label]="editingEntry ? 'Update' : 'Save'" icon="pi pi-check" (onClick)="saveManualEntry()"></p-button>
-    </ng-template>
-    </p-dialog>
-
-    <!-- PDF Report Dialog -->
-    <p-dialog
-    header="Generate PDF Report"
-    [(visible)]="showPdfDialog"
-    [modal]="true"
-    [style]="{width: '400px', 'max-width': '95vw', height: 'auto'}"
-    [closable]="true"
-    [maximizable]="true"
-    >
-    <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project</label>
-        <p-select
-        [options]="projects()"
-        [(ngModel)]="pdfProjectId"
-        optionLabel="name"
-        optionValue="id"
-        placeholder="Select a project"
-        appendTo="body"
-        styleClass="w-full"
-        ></p-select>
+  <!-- Filters -->
+  <div class="filters">
+    <div class="seg" role="group" aria-label="Period">
+      @for (p of periods; track p.value) {
+        <button type="button" [attr.aria-pressed]="period() === p.value" (click)="setPeriod(p.value)">{{ p.label }}</button>
+      }
     </div>
-    <div class="grid grid-cols-2 gap-4 mb-4">
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Year</label>
-        <p-select
-            [options]="pdfYearOptions"
-            [(ngModel)]="pdfYear"
-            optionLabel="label"
-            optionValue="value"
-            appendTo="body"
-            styleClass="w-full"
-        ></p-select>
-        </div>
-        <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Month</label>
-        <p-select
-            [options]="pdfMonthOptions"
-            [(ngModel)]="pdfMonth"
-            optionLabel="label"
-            optionValue="value"
-            appendTo="body"
-            styleClass="w-full"
-        ></p-select>
-        </div>
+    <p-datepicker [(ngModel)]="customRange" selectionMode="range" [readonlyInput]="true" dateFormat="d M yy"
+      [placeholder]="rangeLabel()" (onSelect)="onCustomRange()" appendTo="body" [showIcon]="true" iconDisplay="input"
+      styleClass="filter-range" inputStyleClass="filter-range-input" ariaLabel="Custom date range" />
+    <p-select [options]="projects()" [ngModel]="filterProjectId()" (ngModelChange)="onProjectFilter($event)"
+      optionLabel="name" optionValue="id" placeholder="All projects" [showClear]="true" appendTo="body" styleClass="filter-select">
+      <ng-template #item let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+    </p-select>
+    <p-multiselect [options]="tags()" [ngModel]="filterTagIds()" (ngModelChange)="onTagFilter($event)" optionLabel="name" optionValue="id"
+      placeholder="Any tag" [showToggleAll]="false" [filter]="false" appendTo="body" styleClass="filter-select" selectedItemsLabel="{0} tags" [maxSelectedLabels]="2" />
+  </div>
+
+  <!-- Summary -->
+  <div class="card kpis">
+    <div class="stat-tile">
+      <div class="st-label">Tracked</div>
+      @if (summary(); as s) { <div class="st-value num">{{ formatDuration(s.minutes) }}</div> } @else { <p-skeleton width="6rem" height="1.9rem" /> }
+      <div class="st-foot">{{ rangeLabel() }}</div>
     </div>
-    <ng-template pTemplate="footer">
-        <p-button label="Cancel" icon="pi pi-times" [text]="true" (onClick)="showPdfDialog = false"></p-button>
-        <p-button
-        label="Download"
-        icon="pi pi-download"
-        (onClick)="downloadPdfReport()"
-        [disabled]="!pdfProjectId"
-        [loading]="isDownloadingPdf"
-        ></p-button>
-    </ng-template>
-    </p-dialog>
+    <div class="stat-tile">
+      <div class="st-label">Entries</div>
+      @if (summary(); as s) { <div class="st-value num">{{ s.count }}</div> } @else { <p-skeleton width="3rem" height="1.9rem" /> }
+      <div class="st-foot">{{ summary()?.days ?? 0 }} active {{ summary()?.days === 1 ? 'day' : 'days' }}</div>
+    </div>
+    <div class="stat-tile">
+      <div class="st-label">Average per active day</div>
+      @if (summary(); as s) { <div class="st-value num">{{ formatDuration(s.avgPerDay) }}</div> } @else { <p-skeleton width="6rem" height="1.9rem" /> }
+      <div class="st-foot">&nbsp;</div>
+    </div>
+    <div class="stat-tile">
+      <div class="st-label">Top project</div>
+      @if (summary(); as s) {
+        @if (s.top; as top) {
+          <div class="st-value top-project"><span class="pdot" [style.background]="top.color || 'var(--muted)'"></span><span>{{ top.name }}</span></div>
+          <div class="st-foot num">{{ formatDuration(top.minutes) }} · {{ s.minutes ? ((top.minutes / s.minutes) * 100).toFixed(0) : 0 }}% of time</div>
+        } @else {
+          <div class="st-value top-project muted">—</div><div class="st-foot">&nbsp;</div>
+        }
+      } @else { <p-skeleton width="8rem" height="1.9rem" /> }
+    </div>
+  </div>
+
+  <!-- Entries -->
+  <div class="card overflow-hidden">
+    <p-table [value]="tableRows()" [lazy]="true" (onLazyLoad)="onPage($event)" [paginator]="totalRecords() > rows" [rows]="rows"
+      [first]="first" [totalRecords]="totalRecords()" [rowsPerPageOptions]="[20, 50, 100]" rowGroupMode="subheader" groupRowsBy="day"
+      [loading]="isLoading()" [showLoader]="false" dataKey="id"
+      [showCurrentPageReport]="true" currentPageReportTemplate="{first}–{last} of {totalRecords}">
+      <ng-template #header>
+        <tr>
+          <th class="hide-sm" style="width: 9.5rem">Time</th>
+          <th>Description</th>
+          <th class="hide-sm" style="width: 13rem">Project</th>
+          <th class="hide-sm" style="width: 12rem">Tags</th>
+          <th class="text-right" style="width: 7.5rem">Duration</th>
+          <th class="hide-sm" style="width: 5.5rem"><span class="sr-only">Actions</span></th>
+        </tr>
+      </ng-template>
+      <ng-template #groupheader let-row>
+        <tr class="day-row">
+          <td colspan="6">
+            <div class="flex justify-between gap-4">
+              <span>{{ dayLabel(row.day) }}</span>
+              <span class="num muted">{{ dayTotals().has(row.day) ? formatDuration(dayTotals().get(row.day)!) : '' }}</span>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #body let-e>
+        <tr>
+          <td class="hide-sm num text-ink-2 whitespace-nowrap">{{ timeRange(e) }}</td>
+          <td class="desc">
+            <b>{{ e.description || 'No description' }}</b>
+            @if (e.nextSteps) { <span class="next">{{ e.nextSteps }}</span> }
+            <span class="show-sm mobile-meta">
+              <span class="pdot" [style.background]="e.project?.colorCode || 'var(--muted)'"></span>{{ e.project?.name || 'No project' }} · <span class="num">{{ timeRange(e) }}</span>
+            </span>
+          </td>
+          <td class="hide-sm">
+            <span class="proj"><span class="pdot" [style.background]="e.project?.colorCode || 'var(--muted)'"></span>{{ e.project?.name || 'No project' }}</span>
+          </td>
+          <td class="hide-sm">
+            <div class="chips">@for (t of e.tags; track t.id) { <span class="chip">{{ t.name }}</span> }</div>
+          </td>
+          <td class="text-right num whitespace-nowrap">
+            @if (e.isRunning) {
+              <span class="chip chip-live"><span class="dot-live" style="width:6px;height:6px"></span>{{ formatDuration(minutesOf(e)) }}</span>
+            } @else {
+              {{ formatDuration(e.durationMinutes ?? 0) }}
+            }
+          </td>
+          <td class="hide-sm text-right">
+            @if (!e.isRunning) {
+              <span class="row-actions">
+                <p-button icon="pi pi-pencil" [text]="true" severity="secondary" size="small" ariaLabel="Edit entry" (onClick)="editEntry(e)" />
+                <p-button icon="pi pi-trash" [text]="true" severity="danger" size="small" ariaLabel="Delete entry" (onClick)="deleteEntry(e)" />
+              </span>
+            }
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template #loadingbody>
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <tr><td colspan="6"><p-skeleton height="1.25rem" /></td></tr>
+        }
+      </ng-template>
+      <ng-template #emptymessage>
+        <tr>
+          <td colspan="6">
+            <div class="empty">
+              <i class="pi pi-clock"></i>
+              <b>No entries in this period</b>
+              <p>Start the timer above or add an entry for work you already did.</p>
+              <p-button label="Add entry" icon="pi pi-plus" size="small" severity="secondary" (onClick)="openNewEntry()" />
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
 </div>
+
+<!-- Stop timer -->
+<p-dialog header="Save time entry" [(visible)]="showStopDialog" [modal]="true" [draggable]="false" [focusOnShow]="false" [dismissableMask]="true" [style]="{ width: '32rem' }">
+  <form [formGroup]="stopForm" class="form-grid" (ngSubmit)="stopTimer()" id="stop-form">
+    <div class="dialog-hero">
+      <span class="clock">{{ timer.formatElapsedTime(timer.elapsedSeconds()) }}</span>
+      <span class="muted">tracked since {{ timer.runningTimer() ? timeRange(timer.runningTimer()!).replace(' – now', '') : '' }}</span>
+    </div>
+    <div class="field">
+      <label for="stop-project">Project</label>
+      <p-select inputId="stop-project" formControlName="projectId" [options]="projects()" optionLabel="name" optionValue="id" placeholder="No project" [showClear]="true" appendTo="body">
+        <ng-template #selectedItem let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+        <ng-template #item let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+      </p-select>
+    </div>
+    <div class="field">
+      <label for="stop-desc">What did you work on?</label>
+      <textarea pTextarea id="stop-desc" formControlName="description" rows="2" [autoResize]="true" placeholder="e.g. Invoice export API endpoints"></textarea>
+    </div>
+    <div class="field">
+      <label for="stop-next">Next steps <span class="opt">optional</span></label>
+      <textarea pTextarea id="stop-next" formControlName="nextSteps" rows="2" [autoResize]="true" placeholder="What should happen next time?"></textarea>
+    </div>
+    <div class="field">
+      <label for="stop-tags">Tags <span class="opt">optional</span></label>
+      <p-multiselect inputId="stop-tags" formControlName="tagIds" [options]="tags()" optionLabel="name" optionValue="id" placeholder="Add tags" display="chip" [showToggleAll]="false" appendTo="body" />
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Keep running" [text]="true" severity="secondary" (onClick)="showStopDialog = false" />
+    <p-button label="Stop and save" icon="pi pi-check" type="submit" form="stop-form" [loading]="isSaving()" />
+  </ng-template>
+</p-dialog>
+
+<!-- Add / edit entry -->
+<p-dialog [header]="editingEntry ? 'Edit time entry' : 'Add time entry'" [(visible)]="showEntryDialog" [modal]="true" [draggable]="false" [focusOnShow]="false" [dismissableMask]="true" [style]="{ width: '36rem' }">
+  <form [formGroup]="entryForm" class="form-grid" (ngSubmit)="saveEntry()" id="entry-form">
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label for="entry-start">Start</label>
+        <p-datepicker inputId="entry-start" formControlName="startTime" [showTime]="true" hourFormat="24" dateFormat="d M yy" appendTo="body" [showIcon]="true" iconDisplay="input" />
+      </div>
+      <div class="field">
+        <label for="entry-end">End</label>
+        <p-datepicker inputId="entry-end" formControlName="endTime" [showTime]="true" hourFormat="24" dateFormat="d M yy" appendTo="body" [showIcon]="true" iconDisplay="input" />
+      </div>
+    </div>
+    @if (entryDuration() !== null) {
+      @if (entryDuration()! > 0) {
+        <div class="hint-bar"><i class="pi pi-clock"></i>Duration <b class="num">{{ formatDuration(entryDuration()!) }}</b></div>
+      } @else {
+        <div class="hint-bar error"><i class="pi pi-exclamation-circle"></i>End must be after start.</div>
+      }
+    }
+    <div class="field">
+      <label for="entry-project">Project</label>
+      <p-select inputId="entry-project" formControlName="projectId" [options]="projects()" optionLabel="name" optionValue="id" placeholder="No project" [showClear]="true" appendTo="body">
+        <ng-template #selectedItem let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+        <ng-template #item let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+      </p-select>
+    </div>
+    <div class="field">
+      <label for="entry-desc">Description</label>
+      <textarea pTextarea id="entry-desc" formControlName="description" rows="2" [autoResize]="true" placeholder="What did you work on?"></textarea>
+    </div>
+    <div class="field">
+      <label for="entry-next">Next steps <span class="opt">optional</span></label>
+      <textarea pTextarea id="entry-next" formControlName="nextSteps" rows="2" [autoResize]="true"></textarea>
+    </div>
+    <div class="field">
+      <label for="entry-tags">Tags <span class="opt">optional</span></label>
+      <p-multiselect inputId="entry-tags" formControlName="tagIds" [options]="tags()" optionLabel="name" optionValue="id" placeholder="Add tags" display="chip" [showToggleAll]="false" appendTo="body" />
+    </div>
+  </form>
+  <ng-template #footer>
+    <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showEntryDialog = false" />
+    <p-button [label]="editingEntry ? 'Save changes' : 'Add entry'" type="submit" form="entry-form" [loading]="isSaving()"
+      [disabled]="entryForm.invalid || (entryDuration() ?? 0) <= 0" />
+  </ng-template>
+</p-dialog>
+
+<!-- Reports -->
+<p-dialog header="Monthly report" [(visible)]="showReportDialog" [modal]="true" [draggable]="false" [focusOnShow]="false" [dismissableMask]="true" [style]="{ width: '38rem' }">
+  <div class="form-grid">
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label for="report-project">Project</label>
+        <p-select inputId="report-project" [options]="projects()" [(ngModel)]="reportProjectId" (ngModelChange)="loadReport()" optionLabel="name" optionValue="id" placeholder="Choose a project" appendTo="body">
+          <ng-template #selectedItem let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+          <ng-template #item let-p><span class="opt"><span class="pdot" [style.background]="p.colorCode || 'var(--muted)'"></span>{{ p.name }}</span></ng-template>
+        </p-select>
+      </div>
+      <div class="field">
+        <label for="report-month">Month</label>
+        <p-datepicker inputId="report-month" [(ngModel)]="reportMonth" (ngModelChange)="loadReport()" view="month" dateFormat="MM yy" [readonlyInput]="true" appendTo="body" [showIcon]="true" iconDisplay="input" />
+      </div>
+    </div>
+
+    @if (!reportProjectId) {
+      <div class="empty"><i class="pi pi-briefcase"></i><b>Choose a project</b><p>Reports summarise one project's hours for a month.</p></div>
+    } @else if (reportLoading()) {
+      <p-skeleton height="4.5rem" /><p-skeleton height="8rem" />
+    } @else if (report(); as r) {
+      <div class="report-kpis">
+        <div><span>Hours</span><b class="num">{{ r.totalHours.toFixed(2) }}</b></div>
+        <div><span>Earnings</span><b class="num">{{ reportEarnings() }}</b></div>
+        <div><span>Entries</span><b class="num">{{ r.timeEntries.length }}</b></div>
+      </div>
+      @if (reportDays().length) {
+        <div class="report-days">
+          @for (d of reportDays(); track d.date.getTime()) {
+            <div class="li">
+              <div class="t"><b>{{ d.date.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' }) }}</b><span>{{ d.count }} {{ d.count === 1 ? 'entry' : 'entries' }}</span></div>
+              <span class="r num">{{ formatDuration(d.minutes) }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="empty"><i class="pi pi-calendar"></i><b>Nothing tracked that month</b><p>Pick another month or project.</p></div>
+      }
+    }
+  </div>
+  <ng-template #footer>
+    <p-button label="Close" [text]="true" severity="secondary" (onClick)="showReportDialog = false" />
+    <p-button label="Download PDF" icon="pi pi-download" [loading]="isDownloadingPdf()" [disabled]="!report()?.timeEntries?.length" (onClick)="downloadPdf()" />
+  </ng-template>
+</p-dialog>
