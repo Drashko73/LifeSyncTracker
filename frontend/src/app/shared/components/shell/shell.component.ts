@@ -43,7 +43,7 @@ export class ShellComponent {
     { label: 'Settings', icon: 'pi pi-sliders-h', routerLink: '/settings' },
     { separator: true },
     { label: 'Report an issue', icon: 'pi pi-github', url: 'https://github.com/Drashko73/LifeSyncTracker/issues', target: '_blank' },
-    { label: 'Sign out', icon: 'pi pi-sign-out', command: () => this.auth.logout() },
+    { label: 'Sign out', icon: 'pi pi-sign-out', command: () => this.signOut() },
   ];
 
   protected collapsed = signal(this.readCollapsed());
@@ -70,6 +70,17 @@ export class ShellComponent {
   protected shortElapsed(): string {
     const s = this.timer.elapsedSeconds();
     return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}`;
+  }
+
+  private signingOut = false;
+
+  /** Close the body-appended menu first; log out once it has hidden so it can't outlive the shell. */
+  private signOut(): void {
+    this.signingOut = true;
+  }
+
+  protected onMenuHide(): void {
+    if (this.signingOut) this.auth.logout();
   }
 
   protected toggleCollapsed(): void {

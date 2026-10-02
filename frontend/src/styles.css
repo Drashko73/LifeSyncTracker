@@ -109,7 +109,7 @@ body {
 /* ---------- App shell ---------- */
 .shell { display: flex; min-height: 100%; }
 .sidebar {
-  position: sticky; top: 0; height: 100vh; width: 240px; flex: none; z-index: 10;
+  position: fixed; top: 0; bottom: 0; left: 0; width: 240px; z-index: 10;
   display: flex; flex-direction: column; gap: 2px; padding: 14px 10px;
   border-right: 1px solid var(--line); background: var(--surface);
 }
@@ -142,7 +142,8 @@ body {
 .shell.collapsed .user { height: 40px; }
 .shell.collapsed .brand { justify-content: center; padding-inline: 0; }
 
-.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; margin-left: 240px; }
+.shell.collapsed .main { margin-left: 64px; }
 .topbar {
   position: sticky; top: 0; z-index: 9; display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 28px;
   background: color-mix(in oklab, var(--canvas) 86%, transparent);
@@ -164,9 +165,12 @@ body {
 .seg.icons > button { padding: 0 7px; }
 .seg.icons .pi { font-size: 13px; }
 
+/* Sidebar account menu opens upward from the user block. */
+.side-menu.p-menu-overlay { position: fixed !important; top: auto !important; left: 10px !important; bottom: 62px !important; min-width: 220px; transform-origin: bottom left; }
 .tabbar { display: none; }
 @media (max-width: 767px) {
   .sidebar { display: none; }
+  .main, .shell.collapsed .main { margin-left: 0; }
   .topbar { padding: 0 16px; height: 52px; padding-top: env(safe-area-inset-top, 0px); box-sizing: content-box; }
   .tabbar {
     display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
@@ -393,6 +397,19 @@ body {
 .amount-group > :first-child { flex: 1; }
 .amount-group > :last-child, .field .amount-group .p-select { flex: none; width: 6.5rem; }
 .amount-group .p-inputnumber-input { width: 100%; font-variant-numeric: tabular-nums; }
+
+/* Auth */
+.auth { min-height: 100dvh; box-sizing: border-box; display: grid; place-items: center; padding: 32px 16px; background: var(--canvas); }
+.auth-box { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 20px; }
+.auth-brand { display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; font-size: 17px; letter-spacing: -0.01em; }
+.auth-brand .brand-mark { width: 30px; height: 30px; border-radius: 8px; }
+.auth-card { padding: 28px; box-shadow: 0 1px 2px rgb(11 11 11 / 0.04), 0 8px 24px -12px rgb(11 11 11 / 0.08); }
+.auth-card h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.015em; }
+.auth-sub { margin: 4px 0 20px; color: var(--ink-2); }
+.auth-error { display: flex; gap: 8px; align-items: flex-start; padding: 10px 12px; margin-bottom: 16px; border-radius: 8px; font-size: 13px; color: var(--neg); background: color-mix(in oklab, var(--neg) 9%, transparent); }
+.auth-error .pi { margin-top: 2px; }
+.auth-card form > p-button { display: block; margin-top: 4px; }
+.auth-switch { margin: 0; text-align: center; color: var(--ink-2); font-size: 13px; }
 
 /* Profile */
 .page.narrow { max-width: 760px; }

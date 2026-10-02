@@ -29,7 +29,7 @@
         <i class="pi" [class.pi-angle-double-left]="!collapsed()" [class.pi-angle-double-right]="collapsed()"></i>
         <span class="rail-hide">Collapse</span>
       </button>
-      <button type="button" class="user" (click)="menu.toggle($event)" aria-label="Account menu">
+      <button type="button" class="user" (click)="sideMenu.toggle($event)" aria-label="Account menu">
         <span class="avatar">{{ initial() }}</span>
         <span class="user-meta rail-hide">
           <b>{{ auth.currentUser()?.username }}</b>
@@ -80,4 +80,5 @@
   </nav>
 </div>
 
-<p-menu #menu [popup]="true" [model]="menuItems" appendTo="body" />
+<p-menu #menu [popup]="true" [model]="menuItems" appendTo="body" (onHide)="onMenuHide()" />
+<p-menu #sideMenu [popup]="true" [model]="menuItems" appendTo="body" styleClass="side-menu" (onHide)="onMenuHide()" />
