@@ -1,28 +1,24 @@
-<svg [attr.width]="svgWidth" [attr.height]="svgHeight" class="heatmap-svg">
-    <!-- Month labels -->
-    @for (label of monthLabels; track label.text + label.x) {
-    <text [attr.x]="label.x" y="10" font-size="10"
-            class="fill-gray-500 dark:fill-gray-400">{{ label.text }}</text>
-    }
-    <!-- Day labels -->
-    @if (showDayLabel) {
-    <text x="0" [attr.y]="headerHeight + cellSize * 1 + cellSize / 2 + 3" font-size="9"
-            class="fill-gray-400 dark:fill-gray-500">Mon</text>
-    <text x="0" [attr.y]="headerHeight + cellSize * 3 + cellSize / 2 + 3" font-size="9"
-            class="fill-gray-400 dark:fill-gray-500">Wed</text>
-    <text x="0" [attr.y]="headerHeight + cellSize * 5 + cellSize / 2 + 3" font-size="9"
-            class="fill-gray-400 dark:fill-gray-500">Fri</text>
-    }
-    <!-- Heatmap cells -->
-    @for (cell of cells; track cell.date.getTime()) {
-    <rect
-        [attr.x]="cell.x"
-        [attr.y]="cell.y"
-        [attr.width]="cellSize - 2"
-        [attr.height]="cellSize - 2"
-        rx="2" ry="2"
-        [attr.class]="cell.cssClass">
-        <title>{{ cell.date.toLocaleDateString() }}: {{ cell.value ?? 0 }} hours</title>
-    </rect>
-    }
-</svg>
+<div class="hm">
+  <div class="hm-scroll" #scroller>
+    <svg [attr.width]="grid().width" [attr.height]="grid().height" role="img" aria-label="Tracked hours per day">
+      @for (m of grid().months; track m.x) {
+        <text [attr.x]="m.x" y="11">{{ m.text }}</text>
+      }
+      @for (d of dayLabels; track d.t) {
+        <text x="0" [attr.y]="d.y">{{ d.t }}</text>
+      }
+      @for (c of grid().cells; track c.day.date.getTime()) {
+        <rect [attr.x]="c.x" [attr.y]="c.y" [attr.width]="cell" [attr.height]="cell" rx="2.5"
+              [attr.class]="'heatmap-' + c.level" (mouseenter)="show(c, $event)" (mouseleave)="hover.set(null)" />
+      }
+    </svg>
+  </div>
+  @if (hover(); as h) {
+    <div class="hm-tip" [style.left.px]="h.x" [style.top.px]="h.y">
+      <b>{{ h.title }}</b><span>{{ h.value }}</span>
+    </div>
+  }
+  <div class="hm-legend">
+    Less <i class="heatmap-0"></i><i class="heatmap-1"></i><i class="heatmap-2"></i><i class="heatmap-3"></i><i class="heatmap-4"></i> More
+  </div>
+</div>

@@ -1,107 +1,68 @@
-import { Component, Input, OnChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, computed, input, signal, viewChild } from '@angular/core';
+import { formatDuration } from '../../../core/utils/format';
 
-export interface HeatMapDate {
+export interface HeatmapDay {
   date: Date;
-  value: number | null;
+  hours: number;
 }
 
-interface HeatMapCell {
-  date: Date;
-  value: number | null;
-  x: number;
-  y: number;
-  cssClass: string;
-}
+interface Cell { x: number; y: number; level: number; day: HeatmapDay; }
 
+const CELL = 11, GAP = 3, STEP = CELL + GAP, LEFT = 30, TOP = 18;
+
+/** Same thresholds as the backend's intensity levels. */
+const level = (h: number) => (h <= 0 ? 0 : h < 2 ? 1 : h < 4 ? 2 : h < 6 ? 3 : 4);
+
+/**
+ * Calendar heatmap of tracked hours per day (Monday-first weeks, sequential blue ramp).
+ */
 @Component({
   selector: 'app-heatmap-calendar',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './heatmap-calendar.html'
+  templateUrl: './heatmap-calendar.html',
 })
-export class HeatmapCalendarComponent implements OnChanges {
-  @Input() startDate!: Date;
-  @Input() endDate!: Date;
-  @Input() dates: HeatMapDate[] = [];
-  @Input() classForValue: (date: HeatMapDate) => string = () => 'heatmap-0';
-  @Input() showMonthLabel = true;
-  @Input() showDayLabel = true;
+export class HeatmapCalendarComponent implements AfterViewInit {
+  days = input.required<HeatmapDay[]>();
 
-  cells: HeatMapCell[] = [];
-  monthLabels: { text: string; x: number }[] = [];
-  readonly cellSize = 14;
-  readonly headerHeight = 20;
-  readonly labelWidth = 28;
-  svgWidth = 800;
-  svgHeight = 0;
+  private scroller = viewChild<ElementRef<HTMLElement>>('scroller');
+  protected hover = signal<{ x: number; y: number; title: string; value: string } | null>(null);
+  protected readonly cell = CELL;
+  protected readonly dayLabels = [{ t: 'Mon', r: 0 }, { t: 'Wed', r: 2 }, { t: 'Fri', r: 4 }].map(d => ({ ...d, y: TOP + d.r * STEP + 9 }));
 
-  ngOnChanges(): void {
-    this.buildGrid();
-  }
-
-  private buildGrid(): void {
-    if (!this.startDate || !this.endDate) return;
-
-    const dateMap = new Map<string, number | null>();
-    for (const d of this.dates) {
-      const key = this.dateKey(d.date);
-      dateMap.set(key, d.value);
-    }
-
-    const cells: HeatMapCell[] = [];
-    const months: { text: string; x: number }[] = [];
-    const offsetX = this.showDayLabel ? this.labelWidth : 0;
-
-    const current = new Date(this.startDate);
-    // Move to the start of the week (Sunday)
-    current.setDate(current.getDate() - current.getDay());
-
-    let weekIndex = 0;
+  protected grid = computed(() => {
+    const days = [...this.days()].sort((a, b) => a.date.getTime() - b.date.getTime());
+    if (!days.length) return { cells: [] as Cell[], months: [] as { x: number; text: string }[], width: 0, height: 0 };
+    const offset = (days[0].date.getDay() + 6) % 7; // Monday = 0
+    const cells: Cell[] = [];
+    const months: { x: number; text: string }[] = [];
     let lastMonth = -1;
-
-    while (current <= this.endDate || current.getDay() !== 0) {
-      const dayOfWeek = current.getDay();
-
-      if (dayOfWeek === 0 && current > this.startDate) {
-        weekIndex++;
+    days.forEach((day, i) => {
+      const idx = i + offset, col = Math.floor(idx / 7), row = idx % 7;
+      const x = LEFT + col * STEP;
+      if ((row === 0 || i === 0) && day.date.getMonth() !== lastMonth && day.date.getDate() <= 7) {
+        months.push({ x, text: day.date.toLocaleDateString(undefined, { month: 'short' }) });
+        lastMonth = day.date.getMonth();
       }
+      cells.push({ x, y: TOP + row * STEP, level: level(day.hours), day });
+    });
+    const weeks = Math.ceil((offset + days.length) / 7);
+    return { cells, months, width: LEFT + weeks * STEP, height: TOP + 7 * STEP };
+  });
 
-      // Month labels
-      if (this.showMonthLabel && current.getMonth() !== lastMonth && current >= this.startDate && current <= this.endDate) {
-        lastMonth = current.getMonth();
-        months.push({
-          text: current.toLocaleString('default', { month: 'short' }),
-          x: offsetX + weekIndex * this.cellSize
-        });
-      }
-
-      if (current >= this.startDate && current <= this.endDate) {
-        const key = this.dateKey(current);
-        const value = dateMap.get(key) ?? null;
-        cells.push({
-          date: new Date(current),
-          value,
-          x: offsetX + weekIndex * this.cellSize,
-          y: this.headerHeight + dayOfWeek * this.cellSize,
-          cssClass: this.classForValue({ date: new Date(current), value })
-        });
-      }
-
-      current.setDate(current.getDate() + 1);
-      if (current > this.endDate && current.getDay() !== 0) {
-        break;
-      }
-    }
-
-    this.cells = cells;
-    this.monthLabels = months;
-    this.svgWidth = offsetX + (weekIndex + 1) * this.cellSize;
-    this.svgHeight = this.headerHeight + 7 * this.cellSize;
+  ngAfterViewInit(): void {
+    // Most recent weeks first on narrow screens.
+    const el = this.scroller()?.nativeElement;
+    if (el) setTimeout(() => (el.scrollLeft = el.scrollWidth));
   }
 
-  private dateKey(d: Date): string {
-    const date = new Date(d);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  protected show(cell: Cell, event: MouseEvent): void {
+    const host = (event.currentTarget as SVGElement).closest('.hm')!.getBoundingClientRect();
+    const r = (event.currentTarget as SVGElement).getBoundingClientRect();
+    this.hover.set({
+      x: Math.min(Math.max(r.left - host.left + r.width / 2, 80), host.width - 80), // keep the tip inside the card
+      y: r.top - host.top,
+      title: cell.day.date.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }),
+      value: cell.day.hours > 0 ? formatDuration(cell.day.hours * 60) : 'Nothing tracked',
+    });
   }
 }
