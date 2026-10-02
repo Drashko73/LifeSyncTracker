@@ -1,14 +1,10 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
-import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { ToastModule } from 'primeng/toast';
-import { AvatarModule } from 'primeng/avatar';
-import { DividerModule } from 'primeng/divider';
-import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SkeletonModule } from 'primeng/skeleton';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models';
@@ -20,18 +16,13 @@ import { User } from '../../core/models';
   selector: 'app-profile',
   standalone: true,
   imports: [
-    CommonModule,
+    DatePipe,
     ReactiveFormsModule,
     ButtonModule,
-    CardModule,
     InputTextModule,
     PasswordModule,
-    ToastModule,
-    AvatarModule,
-    DividerModule,
-    ProgressSpinnerModule,
+    SkeletonModule,
   ],
-  providers: [MessageService],
   templateUrl: './profile.component.html',
 })
 export class ProfileComponent implements OnInit {
@@ -121,8 +112,8 @@ export class ProfileComponent implements OnInit {
         if (response.success) {
           this.messageService.add({
             severity: 'success',
-            summary: 'Success',
-            detail: 'Password changed successfully!',
+            summary: 'Password changed',
+            detail: 'Use your new password next time you sign in.',
           });
           this.passwordForm.reset();
         }
@@ -131,8 +122,8 @@ export class ProfileComponent implements OnInit {
         this.isChangingPassword = false;
         this.messageService.add({
           severity: 'error',
-          summary: 'Error',
-          detail: error.error?.message || 'Failed to change password. Please try again.',
+          summary: 'Could not change password',
+          detail: error.error?.message || 'Check your current password and try again.',
         });
       },
     });
