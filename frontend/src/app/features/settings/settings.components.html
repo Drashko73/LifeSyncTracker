@@ -209,7 +209,7 @@
   </form>
   <ng-template #footer>
     <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showProjectDialog = false" />
-    <p-button [label]="editingProject ? 'Save changes' : 'Create project'" type="submit" form="project-form" [loading]="isSaving()" />
+    <p-button [label]="editingProject ? 'Save changes' : 'Create project'" (onClick)="saveProject()" [loading]="isSaving()" />
   </ng-template>
 </p-dialog>
 
@@ -229,7 +229,7 @@
   </form>
   <ng-template #footer>
     <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showTagDialog = false" />
-    <p-button [label]="editingTag ? 'Save changes' : 'Create tag'" type="submit" form="tag-form" [loading]="isSaving()" />
+    <p-button [label]="editingTag ? 'Save changes' : 'Create tag'" (onClick)="saveTag()" [loading]="isSaving()" />
   </ng-template>
 </p-dialog>
 
@@ -267,6 +267,6 @@
   </form>
   <ng-template #footer>
     <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showCategoryDialog = false" />
-    <p-button [label]="editingCategory ? 'Save changes' : 'Create category'" type="submit" form="category-form" [loading]="isSaving()" />
+    <p-button [label]="editingCategory ? 'Save changes' : 'Create category'" (onClick)="saveCategory()" [loading]="isSaving()" />
   </ng-template>
 </p-dialog>

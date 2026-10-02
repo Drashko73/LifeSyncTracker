@@ -189,7 +189,7 @@
   </form>
   <ng-template #footer>
     <p-button label="Keep running" [text]="true" severity="secondary" (onClick)="showStopDialog = false" />
-    <p-button label="Stop and save" icon="pi pi-check" type="submit" form="stop-form" [loading]="isSaving()" />
+    <p-button label="Stop and save" icon="pi pi-check" (onClick)="stopTimer()" [loading]="isSaving()" />
   </ng-template>
 </p-dialog>
 
@@ -235,7 +235,7 @@
   </form>
   <ng-template #footer>
     <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showEntryDialog = false" />
-    <p-button [label]="editingEntry ? 'Save changes' : 'Add entry'" type="submit" form="entry-form" [loading]="isSaving()"
+    <p-button [label]="editingEntry ? 'Save changes' : 'Add entry'" (onClick)="saveEntry()" [loading]="isSaving()"
       [disabled]="entryForm.invalid || (entryDuration() ?? 0) <= 0" />
   </ng-template>
 </p-dialog>

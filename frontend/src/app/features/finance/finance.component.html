@@ -184,6 +184,6 @@
   </form>
   <ng-template #footer>
     <p-button label="Cancel" [text]="true" severity="secondary" (onClick)="showDialog = false" />
-    <p-button [label]="editing ? 'Save changes' : 'Add transaction'" type="submit" form="tx-form" [loading]="isSaving()" />
+    <p-button [label]="editing ? 'Save changes' : 'Add transaction'" (onClick)="save()" [loading]="isSaving()" />
   </ng-template>
 </p-dialog>
