@@ -6,29 +6,42 @@ A unified web platform for freelancers and individuals to track time spent on sp
 
 ## Features
 
-### Time Tracking Module
-- **Project/Task Grouping**: Create projects (e.g., "Company A", "Personal Learning") with optional hourly rates
-- **Tags**: Organize work with tags (e.g., "Development", "Meeting", "Planning")
-- **Timer**: Start/stop timer with a prominent button, modal for project association and descriptions
-- **Manual Entry & Editing**: Add and edit time records manually
-- **Employer Reporting**: Filter by project and month, export to PDF/Excel for invoicing
+### Design
+- **Calm, data-first UI**: one neutral design system across every page, with light, dark and system themes and no theme flash on load
+- **App shell**: collapsible sidebar with a live timer badge, top bar with breadcrumb, timer pill and theme switch, and a bottom tab bar on mobile
+- **Consistent components**: dialogs, dropdowns, date pickers, menus, toasts and confirm dialogs all share the same tokens
 
-### Finance Tracking Module
-- **Transaction Logging**: Track income and expenses with categories
-- **Automatic Earning Calculation**: Auto-create income records based on hourly rates
-- **Financial Summary**: View total income, expenses, and net balance
+### Dashboard
+- **KPI tiles**: week-over-week deltas with sparklines
+- **Cash flow**: 12-month income vs. expenses
+- **Time by project**: ranked bar list
+- **Activity heatmap**: real hours per day, with streaks
+- **Recent activity** feed
 
-### Visualization & Dashboard
-- **Time Distribution Chart**: Pie chart showing time per project
-- **Financial Flow**: Bar chart comparing income vs. expenses
-- **Productivity Heatmap**: Calendar view showing work intensity per day
+### Time Tracking
+- **Projects & tags**: group work into projects (with optional hourly rates) and tag it (e.g. "Development", "Meeting")
+- **Timer**: start against a project from the page or the top bar; the running timer stays visible everywhere
+- **Filters**: period, project and tag, with summary tiles for the selection
+- **Entries grouped by day**, with manual entry and editing
+- **Monthly report**: preview, then export to PDF/Excel for invoicing
+
+### Finance
+- **Transactions**: income and expenses with categories; earnings can be created automatically from hourly rates
+- **Period KPIs**: compared with the previous period, plus savings rate
+- **Monthly trend** and **spending by category**
+- A notice when transactions are in other currencies
+
+### Settings & Profile
+- Manage projects, tags and categories; set currency, timezone and theme preferences
 
 ## Technology Stack
 
 ### Frontend
 - **Framework**: Angular 21
-- **Component Library**: PrimeNG (DataTables, Charts, Inputs, Modals)
-- **Styling**: Tailwind CSS (Utility-first styling for layout and responsiveness)
+- **Component Library**: PrimeNG 21, themed by a custom preset (`core/theme/lifesync-preset.ts`) mapped onto the app's CSS variables
+- **Styling**: Tailwind CSS 4, with the light/dark design tokens in `styles.css` exposed through `@theme`
+- **Charts**: Chart.js
+- **Typography & icons**: Geist font, bundled PrimeIcons
 - **State Management**: Angular Signals
 
 ### Backend
@@ -37,9 +50,9 @@ A unified web platform for freelancers and individuals to track time spent on sp
 - **Authentication**: JWT (JSON Web Token)
 
 ### Database
-- **Development**: SQLite
-- **Production**: PostgreSQL
-- **Strategy**: Code-First Migrations via EF Core
+- **PostgreSQL** in both development and production
+- **Strategy**: Code-First Migrations via EF Core, applied automatically on startup
+- Sensitive fields are encrypted at rest (AES-256-GCM) with HMAC blind-index columns for lookups
 
 ## Project Structure
 
@@ -60,9 +73,10 @@ LifeSyncTracker/
 ├── frontend/
 │   └── src/
 │       ├── app/
-│       │   ├── core/           # Core services, guards, interceptors
-│       │   ├── features/       # Feature modules (auth, dashboard, etc.)
-│       │   └── shared/         # Shared components
+│       │   ├── core/           # Services, guards, interceptors, theme preset, format utils
+│       │   ├── features/       # Pages: auth, dashboard, time-tracking, finance, settings, profile
+│       │   └── shared/         # Shell, stat tile, bar list, heatmap calendar, color field
+│       └── styles.css          # Design tokens (light/dark)
 │       └── environments/       # Environment configurations
 │
 └── README.md
@@ -70,53 +84,32 @@ LifeSyncTracker/
 
 ## Getting Started
 
+**See [SETUP.md](./SETUP.md) for the full development and production/hosting guide.**
+
 ### Prerequisites
-- .NET 8 SDK
-- Node.js 20+ and npm
-- Angular CLI 21
+- .NET 8 SDK (or newer, with the .NET 8 runtime installed)
+- Node.js 20.19+ / 22.12+ and npm
+- Docker (PostgreSQL is required — there is no SQLite fallback)
 
-### Backend Setup
+### Run the whole stack
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend/LifeSyncTracker.API
-   ```
+```bash
+cp .env.example .env   # then fill in the keys — see SETUP.md
+docker compose up -d --build
+```
 
-2. Restore dependencies:
-   ```bash
-   dotnet restore
-   ```
+The app is served at `http://localhost:8088`.
 
-3. Apply database migrations:
-   ```bash
-   dotnet ef database update
-   ```
+### Run for development (hot reload)
 
-4. Run the backend:
-   ```bash
-   dotnet run
-   ```
+```bash
+docker compose -f docker-compose.dev.yml up -d          # Postgres + Mailpit
+cd backend/LifeSyncTracker.API && dotnet run            # API on :5555, Swagger at /swagger
+cd frontend && npm install && npm start                 # app on :4200
+```
 
-   The API will be available at `https://localhost:7001` (or `http://localhost:5000`)
-
-### Frontend Setup
-
-1. Navigate to the frontend directory:
-   ```bash
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the development server:
-   ```bash
-   ng serve
-   ```
-
-   The application will be available at `http://localhost:4200`
+Backend secrets (`Jwt:Key`, `Encryption:Key`, the connection string and SMTP settings)
+come from user-secrets — the exact commands are in [SETUP.md](./SETUP.md#42-configure-backend-secrets-user-secrets).
 
 ## API Endpoints
 
@@ -152,27 +145,20 @@ LifeSyncTracker/
 
 ## Environment Configuration
 
-### Backend (appsettings.json)
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Data Source=lifesync.db"
-  },
-  "Jwt": {
-    "Key": "YourSecretKey",
-    "Issuer": "LifeSyncTracker",
-    "Audience": "LifeSyncTrackerUsers"
-  }
-}
-```
+Secrets are never stored in `appsettings.json` — it ships with the sensitive values
+blank and the app refuses to start without them.
 
-### Frontend (environment.ts)
-```typescript
-export const environment = {
-  production: false,
-  apiUrl: 'https://localhost:7001/api'
-};
-```
+- **Development**: user-secrets (`dotnet user-secrets set "Jwt:Key" "..."`)
+- **Production**: environment variables supplied by `.env` via Docker Compose
+  (`Jwt__Key`, `Encryption__Key`, `ConnectionStrings__PostgresConnection`, `Email__*`)
+
+See [.env.example](./.env.example) for the full list and [SETUP.md](./SETUP.md) for how
+to generate the keys.
+
+### Frontend
+`src/environments/environment.ts` points at `http://localhost:5555/api` for development;
+the production build swaps in `environment.prod.ts`, which uses `/api` and relies on the
+nginx proxy inside the frontend container.
 
 ## License
 

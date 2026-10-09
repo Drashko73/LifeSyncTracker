@@ -1,0 +1,48 @@
+# Development-only infrastructure for LifeSyncTracker.
+#
+# This file does NOT run the app — it only provides the services the app needs
+# while you run the backend (`dotnet run`) and frontend (`npm start`) locally
+# with hot reload:
+#
+#   * postgres  — published on localhost:5432 (the production compose file keeps
+#                 the database unpublished, which is correct there but useless
+#                 for a host-side `dotnet run`).
+#   * mailpit   — a fake SMTP server that catches verification emails instead of
+#                 delivering them. Web UI: http://localhost:8025
+#
+# Usage:
+#   docker compose -f docker-compose.dev.yml up -d
+#   docker compose -f docker-compose.dev.yml down          # keeps data
+#   docker compose -f docker-compose.dev.yml down -v       # wipes the dev DB
+#
+# Uses its own project name and volume, so it never touches the production
+# stack defined in docker-compose.yml.
+name: lifesync-dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DEV_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${DEV_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${DEV_POSTGRES_DB:-lifesynctracker}
+    ports:
+      - "5432:5432"
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DEV_POSTGRES_USER:-postgres} -d ${DEV_POSTGRES_DB:-lifesynctracker}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP  -> set Email:Host=localhost, Email:Port=1025, Email:EnableSsl=false
+      - "8025:8025" # Web UI -> http://localhost:8025
+
+volumes:
+  dev-db-data:
