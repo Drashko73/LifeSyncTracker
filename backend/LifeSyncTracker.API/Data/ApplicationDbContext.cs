@@ -60,6 +60,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     /// <summary>
+    /// Email verification token table.
+    /// </summary>
+    public DbSet<EmailVerificationToken> EmailVerificationTokens { get; set; }
+
+    /// <summary>
     /// Configures the model and relationships.
     /// </summary>
     /// <param name="modelBuilder">The model builder.</param>
@@ -208,6 +213,24 @@ public class ApplicationDbContext : DbContext
                   .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasIndex(rt => rt.Token).IsUnique();
+        });
+
+        // EmailVerificationToken configuration
+        modelBuilder.Entity<EmailVerificationToken>(entity =>
+        {
+            entity.Property(evt => evt.Email)
+                .HasMaxLength(256);
+
+            entity.Property(evt => evt.Code)
+                .HasMaxLength(128);
+
+            entity.Property(evt => evt.RequestedAt)
+                .HasDefaultValueSql("NOW()");
+
+            entity.Property(evt => evt.IsUsed)
+                .HasDefaultValue(false);
+
+            entity.HasIndex(evt => evt.Email);
         });
     }
 }

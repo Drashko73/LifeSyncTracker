@@ -8,6 +8,13 @@ namespace LifeSyncTracker.API.Models.DTOs.Auth.Request
     public class RegisterDto
     {
         /// <summary>
+        /// Verification code sent to the email address.
+        /// </summary>
+        [Required]
+        [RegularExpression("^[0-9]{6}$")]
+        public string Code { get; set; } = string.Empty;
+
+        /// <summary>
         /// Username for the new account.
         /// </summary>
         [Required]
